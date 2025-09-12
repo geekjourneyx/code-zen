@@ -1,422 +1,165 @@
 <div align="center">
-  <img src="src-tauri/icons/icon.png" alt="opcode Logo" width="120" height="120">
+  <img src="src-tauri/icons/icon.png" alt="code-zen Logo" width="120" height="120">
 
-  <h1>opcode</h1>
+  <h1>code-zen • 编码禅师</h1>
   
   <p>
-    <strong>A powerful GUI app and Toolkit for Claude Code</strong>
+    <strong>专注编码，禅意生活</strong>
   </p>
   <p>
-    <strong>Create custom agents, manage interactive Claude Code sessions, run secure background agents, and more.</strong>
+    <strong>在高效编程的同时，保持身心的平衡与健康</strong>
   </p>
   
   <p>
-    <a href="#features"><img src="https://img.shields.io/badge/Features-✨-blue?style=for-the-badge" alt="Features"></a>
-    <a href="#installation"><img src="https://img.shields.io/badge/Install-🚀-green?style=for-the-badge" alt="Installation"></a>
-    <a href="#usage"><img src="https://img.shields.io/badge/Usage-📖-purple?style=for-the-badge" alt="Usage"></a>
-    <a href="#development"><img src="https://img.shields.io/badge/Develop-🛠️-orange?style=for-the-badge" alt="Development"></a>
-    <a href="https://discord.com/invite/KYwhHVzUsY"><img src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
+    <a href="#特色功能"><img src="https://img.shields.io/badge/禅意功能-🧘‍♂️-green?style=for-the-badge" alt="Zen Features"></a>
+    <a href="#安装"><img src="https://img.shields.io/badge/安装-🚀-blue?style=for-the-badge" alt="Installation"></a>
+    <a href="https://github.com/geekjourneyx"><img src="https://img.shields.io/badge/作者-@geekjourneyx-orange?style=for-the-badge" alt="Author"></a>
   </p>
 </div>
 
-![457013521-6133a738-d0cb-4d3e-8746-c6768c82672c](https://github.com/user-attachments/assets/a028de9e-d881-44d8-bae5-7326ab3558b9)
+## 🎯 项目简介
 
-https://github.com/user-attachments/assets/bf0bdf9d-ba91-45af-9ac4-7274f57075cf
+**code-zen** 是基于 [opcode](https://github.com/getAsterisk/opcode/) 二次开发的项目，**专为 Vibe Hacks 第一届黑客松打造**。在保留原版所有功能的基础上，重点增加了**开发者身心平衡管理功能**。
 
-> [!TIP]
-> **⭐ Star the repo and follow [@getAsterisk](https://x.com/getAsterisk) on X for early access to `asteria-swe-v0`**.
+### 编码禅师的由来
+> 在追求技术精进的道路上，我们常常忽视了最本质的东西——身心的平衡。**code-zen** 像一位智慧的禅师，在你专注编码时默默守护，在你需要休息时轻声提醒，让你在高效工作的同时保持内心的平静。
 
-> [!NOTE]
-> This project is not affiliated with, endorsed by, or sponsored by Anthropic. Claude is a trademark of Anthropic, PBC. This is an independent developer project using Claude.
+## 🌟 特色功能
 
-## 🌟 Overview
+### 💚 智能健康管理（新增）
+- **智能休息提醒**：基于你的工作节奏，在最合适的时机提醒休息
+- **双模式提醒**：温和模式（底部横幅）+ 积极模式（全屏提醒）
+- **健康数据面板**：可视化展示你的健康习惯，包括完成率、趋势分析
+- **情境感知**：自动识别专注状态，避免在编码高峰期打扰
+- **夜间模式**：21点后自动停止提醒，保证睡眠质量
 
-**opcode** is a powerful desktop application that transforms how you interact with Claude Code. Built with Tauri 2, it provides a beautiful GUI for managing your Claude Code sessions, creating custom agents, tracking usage, and much more.
+### 🎯 智能时机检测（创新）
+- **自然停顿识别**：在代码提交、文件保存等合适时机提醒
+- **专注状态保护**：避免在你深度思考时打扰
+- **个性化适配**：根据你的工作节奏调整提醒频率
 
-Think of opcode as your command center for Claude Code - bridging the gap between the command-line tool and a visual experience that makes AI-assisted development more intuitive and productive.
+### 📊 健康数据洞察
+- **完成率统计**：按时完成休息任务的比例
+- **趋势分析**：7天/30天健康数据可视化
+- **少打扰统计**：记录因专注而延后提醒的次数
+- **断点完成率**：自然停顿点的响应成功率
 
-## 📋 Table of Contents
+---
 
-- [🌟 Overview](#-overview)
-- [✨ Features](#-features)
-  - [🗂️ Project & Session Management](#️-project--session-management)
-  - [🤖 CC Agents](#-cc-agents)
-  
-  - [📊 Usage Analytics Dashboard](#-usage-analytics-dashboard)
-  - [🔌 MCP Server Management](#-mcp-server-management)
-  - [⏰ Timeline & Checkpoints](#-timeline--checkpoints)
-  - [📝 CLAUDE.md Management](#-claudemd-management)
-- [📖 Usage](#-usage)
-  - [Getting Started](#getting-started)
-  - [Managing Projects](#managing-projects)
-  - [Creating Agents](#creating-agents)
-  - [Tracking Usage](#tracking-usage)
-  - [Working with MCP Servers](#working-with-mcp-servers)
-- [🚀 Installation](#-installation)
-- [🔨 Build from Source](#-build-from-source)
-- [🛠️ Development](#️-development)
-- [🔒 Security](#-security)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [🙏 Acknowledgments](#-acknowledgments)
+## 🚀 快速开始
 
-## ✨ Features
+### 安装步骤
+1. **下载安装包**：从 [Releases](https://github.com/geekjourneyx/opcode/releases) 页面下载对应系统版本
+2. **一键安装**：按照系统提示完成安装
+3. **首次启动**：自动检测 Claude Code 环境
 
-### 🗂️ **Project & Session Management**
-- **Visual Project Browser**: Navigate through all your Claude Code projects in `~/.claude/projects/`
-- **Session History**: View and resume past coding sessions with full context
-- **Smart Search**: Find projects and sessions quickly with built-in search
-- **Session Insights**: See first messages, timestamps, and session metadata at a glance
-
-### 🤖 **CC Agents**
-- **Custom AI Agents**: Create specialized agents with custom system prompts and behaviors
-- **Agent Library**: Build a collection of purpose-built agents for different tasks
-- **Background Execution**: Run agents in separate processes for non-blocking operations
-- **Execution History**: Track all agent runs with detailed logs and performance metrics
-
-
-
-### 📊 **Usage Analytics Dashboard**
-- **Cost Tracking**: Monitor your Claude API usage and costs in real-time
-- **Token Analytics**: Detailed breakdown by model, project, and time period
-- **Visual Charts**: Beautiful charts showing usage trends and patterns
-- **Export Data**: Export usage data for accounting and analysis
-
-### 🔌 **MCP Server Management**
-- **Server Registry**: Manage Model Context Protocol servers from a central UI
-- **Easy Configuration**: Add servers via UI or import from existing configs
-- **Connection Testing**: Verify server connectivity before use
-- **Claude Desktop Import**: Import server configurations from Claude Desktop
-
-### ⏰ **Timeline & Checkpoints**
-- **Session Versioning**: Create checkpoints at any point in your coding session
-- **Visual Timeline**: Navigate through your session history with a branching timeline
-- **Instant Restore**: Jump back to any checkpoint with one click
-- **Fork Sessions**: Create new branches from existing checkpoints
-- **Diff Viewer**: See exactly what changed between checkpoints
-
-### 📝 **CLAUDE.md Management**
-- **Built-in Editor**: Edit CLAUDE.md files directly within the app
-- **Live Preview**: See your markdown rendered in real-time
-- **Project Scanner**: Find all CLAUDE.md files in your projects
-- **Syntax Highlighting**: Full markdown support with syntax highlighting
-
-## 📖 Usage
-
-### Getting Started
-
-1. **Launch opcode**: Open the application after installation
-2. **Welcome Screen**: Choose between CC Agents or Projects
-3. **First Time Setup**: opcode will automatically detect your `~/.claude` directory
-
-### Managing Projects
-
+### 健康功能设置
 ```
-Projects → Select Project → View Sessions → Resume or Start New
+设置 → 健康管理 → 个性化配置
 ```
 
-- Click on any project to view its sessions
-- Each session shows the first message and timestamp
-- Resume sessions directly or start new ones
+- 设置提醒间隔（建议：微活动30分钟，眼保健20分钟）
+- 选择提醒强度（温和/积极）
+- 配置安静时段（避免休息时间）
 
-### Creating Agents
+---
 
-```
-CC Agents → Create Agent → Configure → Execute
-```
+## 🏆 黑客松亮点
 
-1. **Design Your Agent**: Set name, icon, and system prompt
-2. **Configure Model**: Choose between available Claude models
-3. **Set Permissions**: Configure file read/write and network access
-4. **Execute Tasks**: Run your agent on any project
+### 🎨 技术创新
+- **Rust + React 架构**：高性能后端，流畅前端体验
+- **智能算法**：基于用户行为模式的个性化提醒
+- **数据可视化**：实时健康数据展示
 
-### Tracking Usage
+### 💡 用户体验
+- **零学习成本**：安装即用，无需复杂配置
+- **无侵入设计**：温和提醒，不打扰工作流
+- **个性化定制**：适应不同用户习惯
 
-```
-Menu → Usage Dashboard → View Analytics
-```
+### 🏅 社会价值
+- **关注程序员健康**：解决长期被忽视的职业健康问题
+- **提升工作效率**：适当休息反而能提高编码效率
+- **培养健康习惯**：用技术的方式帮助建立良好作息
 
-- Monitor costs by model, project, and date
-- Export data for reports
-- Set up usage alerts (coming soon)
+---
 
-### Working with MCP Servers
-
-```
-Menu → MCP Manager → Add Server → Configure
-```
-
-- Add servers manually or via JSON
-- Import from Claude Desktop configuration
-- Test connections before using
-
-## 🚀 Installation
-
-### Prerequisites
-
-- **Claude Code CLI**: Install from [Claude's official site](https://claude.ai/code)
-
-### Release Executables Will Be Published Soon
-
-## 🔨 Build from Source
-
-### Prerequisites
-
-Before building opcode from source, ensure you have the following installed:
-
-#### System Requirements
-
-- **Operating System**: Windows 10/11, macOS 11+, or Linux (Ubuntu 20.04+)
-- **RAM**: Minimum 4GB (8GB recommended)
-- **Storage**: At least 1GB free space
-
-#### Required Tools
-
-1. **Rust** (1.70.0 or later)
-   ```bash
-   # Install via rustup
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   ```
-
-2. **Bun** (latest version)
-   ```bash
-   # Install bun
-   curl -fsSL https://bun.sh/install | bash
-   ```
-
-3. **Git**
-   ```bash
-   # Usually pre-installed, but if not:
-   # Ubuntu/Debian: sudo apt install git
-   # macOS: brew install git
-   # Windows: Download from https://git-scm.com
-   ```
-
-4. **Claude Code CLI**
-   - Download and install from [Claude's official site](https://claude.ai/code)
-   - Ensure `claude` is available in your PATH
-
-#### Platform-Specific Dependencies
-
-**Linux (Ubuntu/Debian)**
-```bash
-# Install system dependencies
-sudo apt update
-sudo apt install -y \
-  libwebkit2gtk-4.1-dev \
-  libgtk-3-dev \
-  libayatana-appindicator3-dev \
-  librsvg2-dev \
-  patchelf \
-  build-essential \
-  curl \
-  wget \
-  file \
-  libssl-dev \
-  libxdo-dev \
-  libsoup-3.0-dev \
-  libjavascriptcoregtk-4.1-dev
-```
-
-**macOS**
-```bash
-# Install Xcode Command Line Tools
-xcode-select --install
-
-# Install additional dependencies via Homebrew (optional)
-brew install pkg-config
-```
-
-**Windows**
-- Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-- Install [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) (usually pre-installed on Windows 11)
-
-### Build Steps
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/getAsterisk/opcode.git
-   cd opcode
-   ```
-
-2. **Install Frontend Dependencies**
-   ```bash
-   bun install
-   ```
-
-3. **Build the Application**
-   
-   **For Development (with hot reload)**
-   ```bash
-   bun run tauri dev
-   ```
-   
-   **For Production Build**
-   ```bash
-   # Build the application
-   bun run tauri build
-   
-   # The built executable will be in:
-   # - Linux: src-tauri/target/release/
-   # - macOS: src-tauri/target/release/
-   # - Windows: src-tauri/target/release/
-   ```
-
-4. **Platform-Specific Build Options**
-   
-   **Debug Build (faster compilation, larger binary)**
-   ```bash
-   bun run tauri build --debug
-   ```
-   
-   **Universal Binary for macOS (Intel + Apple Silicon)**
-   ```bash
-   bun run tauri build --target universal-apple-darwin
-   ```
-
-### Troubleshooting
-
-#### Common Issues
-
-1. **"cargo not found" error**
-   - Ensure Rust is installed and `~/.cargo/bin` is in your PATH
-   - Run `source ~/.cargo/env` or restart your terminal
-
-2. **Linux: "webkit2gtk not found" error**
-   - Install the webkit2gtk development packages listed above
-   - On newer Ubuntu versions, you might need `libwebkit2gtk-4.0-dev`
-
-3. **Windows: "MSVC not found" error**
-   - Install Visual Studio Build Tools with C++ support
-   - Restart your terminal after installation
-
-4. **"claude command not found" error**
-   - Ensure Claude Code CLI is installed and in your PATH
-   - Test with `claude --version`
-
-5. **Build fails with "out of memory"**
-   - Try building with fewer parallel jobs: `cargo build -j 2`
-   - Close other applications to free up RAM
-
-#### Verify Your Build
-
-After building, you can verify the application works:
-
-```bash
-# Run the built executable directly
-# Linux/macOS
-./src-tauri/target/release/opcode
-
-# Windows
-./src-tauri/target/release/opcode.exe
-```
-
-### Build Artifacts
-
-The build process creates several artifacts:
-
-- **Executable**: The main opcode application
-- **Installers** (when using `tauri build`):
-  - `.deb` package (Linux)
-  - `.AppImage` (Linux)
-  - `.dmg` installer (macOS)
-  - `.msi` installer (Windows)
-  - `.exe` installer (Windows)
-
-All artifacts are located in `src-tauri/target/release/`.
-
-## 🛠️ Development
-
-### Tech Stack
-
-- **Frontend**: React 18 + TypeScript + Vite 6
-- **Backend**: Rust with Tauri 2
-- **UI Framework**: Tailwind CSS v4 + shadcn/ui
-- **Database**: SQLite (via rusqlite)
-- **Package Manager**: Bun
-
-### Project Structure
+## 🔧 技术架构
 
 ```
-opcode/
-├── src/                   # React frontend
-│   ├── components/        # UI components
-│   ├── lib/               # API client & utilities
-│   └── assets/            # Static assets
-├── src-tauri/             # Rust backend
-│   ├── src/
-│   │   ├── commands/      # Tauri command handlers
-│   │   ├── checkpoint/    # Timeline management
-│   │   └── process/       # Process management
-│   └── tests/             # Rust test suite
-└── public/                # Public assets
+前端：React 18 + TypeScript + Tailwind CSS
+后端：Rust + Tauri 2 + SQLite
+通信：Tauri IPC 机制
+存储：本地 SQLite 数据库
 ```
 
-### Development Commands
+### 核心组件
+- **HealthScheduler**：智能调度引擎
+- **HealthPanel**：数据可视化面板
+- **HealthNudgeBar**：温和提醒组件
+- **HealthCountdown**：积极提醒模式
 
-```bash
-# Start development server
-bun run tauri dev
+---
 
-# Run frontend only
-bun run dev
+## 👨‍💻 开发者信息
 
-# Type checking
-bunx tsc --noEmit
+**作者**：[geekjourneyx](https://github.com/geekjourneyx)  
+**博客**：[geeki.cc](https://geeki.cc)  
+**X账号**：[@seekjourney](https://x.com/seekjourney)  
 
-# Run Rust tests
-cd src-tauri && cargo test
+**项目背景**：Vibe Hacks 第一届黑客松参赛作品  
+**原项目**：[opcode](https://github.com/getAsterisk/opcode/) by [Asterisk](https://asterisk.so/)  
 
-# Format code
-cd src-tauri && cargo fmt
-```
+---
 
-## 🔒 Security
+## 📄 开源协议
 
-opcode prioritizes your privacy and security:
+本项目基于 AGPL-3.0 协议开源。
 
-1. **Process Isolation**: Agents run in separate processes
-2. **Permission Control**: Configure file and network access per agent
-3. **Local Storage**: All data stays on your machine
-4. **No Telemetry**: No data collection or tracking
-5. **Open Source**: Full transparency through open source code
+**重要声明**：
+- 本项目是 [opcode](https://github.com/getAsterisk/opcode/) 的二次开发作品
+- 保留所有原始版权声明和许可证
+- 原项目版权所有：Asterisk
 
-## 🤝 Contributing
+---
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+## 🤝 参与贡献
 
-### Areas for Contribution
+欢迎提交 Issue 和 Pull Request！
 
-- 🐛 Bug fixes and improvements
-- ✨ New features and enhancements
-- 📚 Documentation improvements
-- 🎨 UI/UX enhancements
-- 🧪 Test coverage
-- 🌐 Internationalization
-
-## 📄 License
-
-This project is licensed under the AGPL License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with [Tauri](https://tauri.app/) - The secure framework for building desktop apps
-- [Claude](https://claude.ai) by Anthropic
+### 特别感谢
+感谢原作者 Asterisk 创建的优秀项目 opcode，让我们能够在此基础上进行创新。  
+感谢 Vibe Hacks 提供展示技术创意的平台。
 
 ---
 
 <div align="center">
   <p>
-    <strong>Made with ❤️ by the <a href="https://asterisk.so/">Asterisk</a></strong>
+    <strong>用技术守护健康，让编程更美好</strong>
   </p>
   <p>
-    <a href="https://github.com/getAsterisk/opcode/issues">Report Bug</a>
+    <a href="https://github.com/geekjourneyx/opcode">⭐ Star 支持</a>
     ·
-    <a href="https://github.com/getAsterisk/opcode/issues">Request Feature</a>
+    <a href="https://github.com/geekjourneyx/opcode/issues">🐛 提交问题</a>
   </p>
 </div>
 
+---
 
-## Star History
+## 🌐 English Version
 
-[![Star History Chart](https://api.star-history.com/svg?repos=getAsterisk/opcode&type=Date)](https://www.star-history.com/#getAsterisk/opcode&Date)
+### Why Health Version?
+> Programmers are the group most likely to neglect their health. We sit in front of computers for long periods, forgetting to rest, move, and protect our eyes. **opcode Health Edition** is your personal health assistant, intelligently reminding you to take breaks at the right time.
+
+### Core Features
+- **Smart Break Reminders**: Based on your work rhythm, remind you to rest at the most appropriate time
+- **Dual Mode Alerts**: Gentle mode (bottom banner) + Active mode (full-screen reminder)  
+- **Health Dashboard**: Visual display of your health habits, including completion rates and trend analysis
+- **Context Awareness**: Automatically recognize focus state, avoid interruptions during peak coding periods
+- **Night Mode**: Automatically stop reminders after 21:00 to ensure sleep quality
+
+### Technical Innovation
+- **Natural Breakpoint Detection**: AI intelligent recognition at natural pause points like code commits and file saves
+- **Non-intrusive Design**: Never suddenly pop up when you're focused on coding
+- **Personalized Learning**: Automatically adjust reminder frequency based on your schedule
+
+**Made with ❤️ for Vibe Hacks First Hackathon**
