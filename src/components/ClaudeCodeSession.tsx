@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
   Copy,
   ChevronDown,
   GitBranch,
@@ -93,20 +93,20 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const [showSlashCommandsSettings, setShowSlashCommandsSettings] = useState(false);
   const [forkCheckpointId, setForkCheckpointId] = useState<string | null>(null);
   const [forkSessionName, setForkSessionName] = useState("");
-  
+
   // Queued prompts state
   const [queuedPrompts, setQueuedPrompts] = useState<Array<{ id: string; prompt: string; model: "sonnet" | "opus" }>>([]);
-  
+
   // New state for preview feature
   const [showPreview, setShowPreview] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
   const [showPreviewPrompt, setShowPreviewPrompt] = useState(false);
   const [splitPosition, setSplitPosition] = useState(50);
   const [isPreviewMaximized, setIsPreviewMaximized] = useState(false);
-  
+
   // Add collapsed state for queued prompts
   const [queuedPromptsCollapsed, setQueuedPromptsCollapsed] = useState(false);
-  
+
   const parentRef = useRef<HTMLDivElement>(null);
   const unlistenRefs = useRef<UnlistenFn[]>([]);
   const hasActiveSessionRef = useRef(false);
@@ -115,7 +115,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const isMountedRef = useRef(true);
   const isListeningRef = useRef(false);
   const sessionStartTime = useRef<number>(Date.now());
-  
+
   // Session metrics state for enhanced analytics
   const sessionMetrics = useRef({
     firstMessageTime: null as number | null,
@@ -139,14 +139,14 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   useComponentMetrics('ClaudeCodeSession');
   // const aiTracking = useAIInteractionTracking('sonnet'); // Default model
   const workflowTracking = useWorkflowTracking('claude_session');
-  
+
   // Call onProjectPathChange when component mounts with initial path
   useEffect(() => {
     if (onProjectPathChange && projectPath) {
       onProjectPathChange(projectPath);
     }
   }, []); // Only run on mount
-  
+
   // Keep ref in sync with state
   useEffect(() => {
     queuedPromptsRef.current = queuedPrompts;
@@ -197,13 +197,13 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 for (let i = index - 1; i >= 0; i--) {
                   const prevMsg = messages[i];
                   if (prevMsg.type === 'assistant' && prevMsg.message?.content && Array.isArray(prevMsg.message.content)) {
-                    const toolUse = prevMsg.message.content.find((c: any) => 
+                    const toolUse = prevMsg.message.content.find((c: any) =>
                       c.type === 'tool_use' && c.id === content.tool_use_id
                     );
                     if (toolUse) {
                       const toolName = toolUse.name?.toLowerCase();
                       const toolsWithWidgets = [
-                        'task', 'edit', 'multiedit', 'todowrite', 'ls', 'read', 
+                        'task', 'edit', 'multiedit', 'todowrite', 'ls', 'read',
                         'glob', 'bash', 'write', 'grep'
                       ];
                       if (toolsWithWidgets.includes(toolName) || toolUse.name?.startsWith('mcp__')) {
@@ -253,7 +253,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     if (session) {
       // Set the claudeSessionId immediately when we have a session
       setClaudeSessionId(session.id);
-      
+
       // Load session history first, then check for active session
       const initializeSession = async () => {
         await loadSessionHistory();
@@ -262,7 +262,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           await checkForActiveSession();
         }
       };
-      
+
       initializeSession();
     }
   }, [session]); // Remove hasLoadedSession dependency to ensure it runs on mount
@@ -295,13 +295,13 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
   const loadSessionHistory = async () => {
     if (!session) return;
-    
+
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const history = await api.loadSessionHistory(session.id, session.project_id);
-      
+
       // Save session data for restoration
       if (history && history.length > 0) {
         SessionPersistenceService.saveSession(
@@ -311,19 +311,19 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           history.length
         );
       }
-      
+
       // Convert history to messages format
       const loadedMessages: ClaudeStreamMessage[] = history.map(entry => ({
         ...entry,
         type: entry.type || "assistant"
       }));
-      
+
       setMessages(loadedMessages);
       setRawJsonlOutput(history.map(h => JSON.stringify(h)));
-      
+
       // After loading history, we're continuing a conversation
       setIsFirstPrompt(false);
-      
+
       // Scroll to bottom after loading history
       setTimeout(() => {
         if (loadedMessages.length > 0) {
@@ -349,16 +349,16 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           }
           return false;
         });
-        
+
         if (activeSession) {
           // Session is still active, reconnect to its stream
           console.log('[ClaudeCodeSession] Found active session, reconnecting:', session.id);
           // IMPORTANT: Set claudeSessionId before reconnecting
           setClaudeSessionId(session.id);
-          
+
           // Don't add buffered messages here - they've already been loaded by loadSessionHistory
           // Just set up listeners for new messages
-          
+
           // Set up listeners for the active session
           reconnectToSession(session.id);
         }
@@ -370,33 +370,33 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
   const reconnectToSession = async (sessionId: string) => {
     console.log('[ClaudeCodeSession] Reconnecting to session:', sessionId);
-    
+
     // Prevent duplicate listeners
     if (isListeningRef.current) {
       console.log('[ClaudeCodeSession] Already listening to session, skipping reconnect');
       return;
     }
-    
+
     // Clean up previous listeners
     unlistenRefs.current.forEach(unlisten => unlisten());
     unlistenRefs.current = [];
-    
+
     // IMPORTANT: Set the session ID before setting up listeners
     setClaudeSessionId(sessionId);
-    
+
     // Mark as listening
     isListeningRef.current = true;
-    
+
     // Set up session-specific listeners
     const outputUnlisten = await listen<string>(`claude-output:${sessionId}`, async (event) => {
       try {
         console.log('[ClaudeCodeSession] Received claude-output on reconnect:', event.payload);
-        
+
         if (!isMountedRef.current) return;
-        
+
         // Store raw JSONL
         setRawJsonlOutput(prev => [...prev, event.payload]);
-        
+
         // Parse and display
         const message = JSON.parse(event.payload) as ClaudeStreamMessage;
         setMessages(prev => [...prev, message]);
@@ -421,7 +421,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     });
 
     unlistenRefs.current = [outputUnlisten, errorUnlisten, completeUnlisten];
-    
+
     // Mark as loading to show the session is active
     if (isMountedRef.current) {
       setIsLoading(true);
@@ -433,14 +433,14 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
   const handleSendPrompt = async (prompt: string, model: "sonnet" | "opus") => {
     console.log('[ClaudeCodeSession] handleSendPrompt called with:', { prompt, model, projectPath, claudeSessionId, effectiveSession });
-    
+
     if (!projectPath) {
       setError("Please select a project directory first");
       return;
     }
 
     // 自然断点：用户发送后触发健康检查（非阻塞）
-    try { (await import('@/lib/health')).checkAtBreakpoint(); } catch {}
+    try { (await import('@/lib/health')).checkAtBreakpoint(); } catch { }
 
     // If already loading, queue the prompt
     if (isLoading) {
@@ -457,21 +457,21 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       setIsLoading(true);
       setError(null);
       hasActiveSessionRef.current = true;
-      
+
       // For resuming sessions, ensure we have the session ID
       if (effectiveSession && !claudeSessionId) {
         setClaudeSessionId(effectiveSession.id);
       }
-      
+
       // Only clean up and set up new listeners if not already listening
       if (!isListeningRef.current) {
         // Clean up previous listeners
         unlistenRefs.current.forEach(unlisten => unlisten());
         unlistenRefs.current = [];
-        
+
         // Mark as setting up listeners
         isListeningRef.current = true;
-        
+
         // --------------------------------------------------------------------
         // 1️⃣  Event Listener Setup Strategy
         // --------------------------------------------------------------------
@@ -529,7 +529,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 if (!extractedSessionInfo) {
                   const projectId = projectPath.replace(/[^a-zA-Z0-9]/g, '-');
                   setExtractedSessionInfo({ sessionId: msg.session_id, projectId });
-                  
+
                   // Save session data for restoration
                   SessionPersistenceService.saveSession(
                     msg.session_id,
@@ -553,12 +553,12 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           try {
             // Don't process if component unmounted
             if (!isMountedRef.current) return;
-            
+
             // Store raw JSONL
             setRawJsonlOutput((prev) => [...prev, payload]);
 
             const message = JSON.parse(payload) as ClaudeStreamMessage;
-            
+
             // Track enhanced tool execution
             if (message.type === 'assistant' && message.message?.content) {
               const toolUses = message.message.content.filter((c: any) => c.type === 'tool_use');
@@ -566,7 +566,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 // Increment tools executed counter
                 sessionMetrics.current.toolsExecuted += 1;
                 sessionMetrics.current.lastActivityTime = Date.now();
-                
+
                 // Track file operations
                 const toolName = toolUse.name?.toLowerCase() || '';
                 if (toolName.includes('create') || toolName.includes('write')) {
@@ -576,12 +576,12 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 } else if (toolName.includes('delete')) {
                   sessionMetrics.current.filesDeleted += 1;
                 }
-                
+
                 // Track tool start - we'll track completion when we get the result
                 workflowTracking.trackStep(toolUse.name);
               });
             }
-            
+
             // Track tool results
             if (message.type === 'user' && message.message?.content) {
               const toolResults = message.message.content.filter((c: any) => c.type === 'tool_result');
@@ -591,7 +591,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 if (isError) {
                   sessionMetrics.current.toolsFailed += 1;
                   sessionMetrics.current.errorsEncountered += 1;
-                  
+
                   trackEvent.enhancedError({
                     error_type: 'tool_execution',
                     error_code: 'tool_failed',
@@ -606,10 +606,10 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 }
               });
             }
-            
+
             // Track code blocks generated
             if (message.type === 'assistant' && message.message?.content) {
-              const codeBlocks = message.message.content.filter((c: any) => 
+              const codeBlocks = message.message.content.filter((c: any) =>
                 c.type === 'text' && c.text?.includes('```')
               );
               if (codeBlocks.length > 0) {
@@ -620,12 +620,12 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 });
               }
             }
-            
+
             // Track errors in system messages
             if (message.type === 'system' && (message.subtype === 'error' || message.error)) {
               sessionMetrics.current.errorsEncountered += 1;
             }
-            
+
             setMessages((prev) => [...prev, message]);
           } catch (err) {
             console.error('Failed to parse message:', err, payload);
@@ -637,31 +637,31 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           setIsLoading(false);
           hasActiveSessionRef.current = false;
           isListeningRef.current = false; // Reset listening state
-          
+
           // Track enhanced session stopped metrics when session completes
           if (effectiveSession && claudeSessionId) {
             const sessionStartTimeValue = messages.length > 0 ? messages[0].timestamp || Date.now() : Date.now();
             const duration = Date.now() - sessionStartTimeValue;
             const metrics = sessionMetrics.current;
-            const timeToFirstMessage = metrics.firstMessageTime 
-              ? metrics.firstMessageTime - sessionStartTime.current 
+            const timeToFirstMessage = metrics.firstMessageTime
+              ? metrics.firstMessageTime - sessionStartTime.current
               : undefined;
             const idleTime = Date.now() - metrics.lastActivityTime;
             const avgResponseTime = metrics.toolExecutionTimes.length > 0
               ? metrics.toolExecutionTimes.reduce((a, b) => a + b, 0) / metrics.toolExecutionTimes.length
               : undefined;
-            
+
             trackEvent.enhancedSessionStopped({
               // Basic metrics
               duration_ms: duration,
               messages_count: messages.length,
               reason: success ? 'completed' : 'error',
-              
+
               // Timing metrics
               time_to_first_message_ms: timeToFirstMessage,
               average_response_time_ms: avgResponseTime,
               idle_time_ms: idleTime,
-              
+
               // Interaction metrics
               prompts_sent: metrics.promptsSent,
               tools_executed: metrics.toolsExecuted,
@@ -669,25 +669,25 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
               files_created: metrics.filesCreated,
               files_modified: metrics.filesModified,
               files_deleted: metrics.filesDeleted,
-              
+
               // Content metrics
               total_tokens_used: totalTokens,
               code_blocks_generated: metrics.codeBlocksGenerated,
               errors_encountered: metrics.errorsEncountered,
-              
+
               // Session context
-              model: metrics.modelChanges.length > 0 
-                ? metrics.modelChanges[metrics.modelChanges.length - 1].to 
+              model: metrics.modelChanges.length > 0
+                ? metrics.modelChanges[metrics.modelChanges.length - 1].to
                 : 'sonnet',
               has_checkpoints: metrics.checkpointCount > 0,
               checkpoint_count: metrics.checkpointCount,
               was_resumed: metrics.wasResumed,
-              
+
               // Agent context (if applicable)
               agent_type: undefined, // TODO: Pass from agent execution
               agent_name: undefined, // TODO: Pass from agent execution
               agent_success: success,
-              
+
               // Stop context
               stop_source: 'completed',
               final_state: success ? 'success' : 'failed',
@@ -720,13 +720,13 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           }
 
           // Trigger health check at natural breakpoint (model response finished)
-          try { (await import('@/lib/health')).checkAtBreakpoint(); } catch {}
+          try { (await import('@/lib/health')).checkAtBreakpoint(); } catch { }
 
           // Process queued prompts after completion
           if (queuedPromptsRef.current.length > 0) {
             const [nextPrompt, ...remainingPrompts] = queuedPromptsRef.current;
             setQueuedPrompts(remainingPrompts);
-            
+
             // Small delay to ensure UI updates
             setTimeout(() => {
               handleSendPrompt(nextPrompt.prompt, nextPrompt.model);
@@ -764,19 +764,19 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           }
         };
         setMessages(prev => [...prev, userMessage]);
-        
+
         // Update session metrics
         sessionMetrics.current.promptsSent += 1;
         sessionMetrics.current.lastActivityTime = Date.now();
         if (!sessionMetrics.current.firstMessageTime) {
           sessionMetrics.current.firstMessageTime = Date.now();
         }
-        
+
         // Track model changes
-        const lastModel = sessionMetrics.current.modelChanges.length > 0 
+        const lastModel = sessionMetrics.current.modelChanges.length > 0
           ? sessionMetrics.current.modelChanges[sessionMetrics.current.modelChanges.length - 1].to
           : (sessionMetrics.current.wasResumed ? 'sonnet' : model); // Default to sonnet if resumed
-        
+
         if (lastModel !== model) {
           sessionMetrics.current.modelChanges.push({
             from: lastModel,
@@ -784,14 +784,14 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             timestamp: Date.now()
           });
         }
-        
+
         // Track enhanced prompt submission
         const codeBlockMatches = prompt.match(/```[\s\S]*?```/g) || [];
         const hasCode = codeBlockMatches.length > 0;
         const conversationDepth = messages.filter(m => m.user_message).length;
         const sessionAge = sessionStartTime.current ? Date.now() - sessionStartTime.current : 0;
         const wordCount = prompt.split(/\s+/).filter(word => word.length > 0).length;
-        
+
         trackEvent.enhancedPromptSubmitted({
           prompt_length: prompt.length,
           model: model,
@@ -851,8 +851,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         markdown += `## Assistant\n\n`;
         for (const content of msg.message.content || []) {
           if (content.type === "text") {
-            const textContent = typeof content.text === 'string' 
-              ? content.text 
+            const textContent = typeof content.text === 'string'
+              ? content.text
               : (content.text?.text || JSON.stringify(content.text || content));
             markdown += `${textContent}\n\n`;
           } else if (content.type === "tool_use") {
@@ -867,8 +867,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         markdown += `## User\n\n`;
         for (const content of msg.message.content || []) {
           if (content.type === "text") {
-            const textContent = typeof content.text === 'string' 
-              ? content.text 
+            const textContent = typeof content.text === 'string'
+              ? content.text
               : (content.text?.text || JSON.stringify(content.text));
             markdown += `${textContent}\n\n`;
           } else if (content.type === "tool_result") {
@@ -911,7 +911,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     // Ensure timeline reloads to highlight current checkpoint
     setTimelineVersion((v) => v + 1);
   };
-  
+
   const handleCheckpointCreated = () => {
     // Update checkpoint count in session metrics
     sessionMetrics.current.checkpointCount += 1;
@@ -919,35 +919,35 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
   const handleCancelExecution = async () => {
     if (!claudeSessionId || !isLoading) return;
-    
+
     try {
       const sessionStartTime = messages.length > 0 ? messages[0].timestamp || Date.now() : Date.now();
       const duration = Date.now() - sessionStartTime;
-      
+
       await api.cancelClaudeExecution(claudeSessionId);
-      
+
       // Calculate metrics for enhanced analytics
       const metrics = sessionMetrics.current;
-      const timeToFirstMessage = metrics.firstMessageTime 
-        ? metrics.firstMessageTime - sessionStartTime.current 
+      const timeToFirstMessage = metrics.firstMessageTime
+        ? metrics.firstMessageTime - sessionStartTime.current
         : undefined;
       const idleTime = Date.now() - metrics.lastActivityTime;
       const avgResponseTime = metrics.toolExecutionTimes.length > 0
         ? metrics.toolExecutionTimes.reduce((a, b) => a + b, 0) / metrics.toolExecutionTimes.length
         : undefined;
-      
+
       // Track enhanced session stopped
       trackEvent.enhancedSessionStopped({
         // Basic metrics
         duration_ms: duration,
         messages_count: messages.length,
         reason: 'user_stopped',
-        
+
         // Timing metrics
         time_to_first_message_ms: timeToFirstMessage,
         average_response_time_ms: avgResponseTime,
         idle_time_ms: idleTime,
-        
+
         // Interaction metrics
         prompts_sent: metrics.promptsSent,
         tools_executed: metrics.toolsExecuted,
@@ -955,45 +955,45 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         files_created: metrics.filesCreated,
         files_modified: metrics.filesModified,
         files_deleted: metrics.filesDeleted,
-        
+
         // Content metrics
         total_tokens_used: totalTokens,
         code_blocks_generated: metrics.codeBlocksGenerated,
         errors_encountered: metrics.errorsEncountered,
-        
+
         // Session context
-        model: metrics.modelChanges.length > 0 
-          ? metrics.modelChanges[metrics.modelChanges.length - 1].to 
+        model: metrics.modelChanges.length > 0
+          ? metrics.modelChanges[metrics.modelChanges.length - 1].to
           : 'sonnet', // Default to sonnet
         has_checkpoints: metrics.checkpointCount > 0,
         checkpoint_count: metrics.checkpointCount,
         was_resumed: metrics.wasResumed,
-        
+
         // Agent context (if applicable)
         agent_type: undefined, // TODO: Pass from agent execution
         agent_name: undefined, // TODO: Pass from agent execution
         agent_success: undefined, // TODO: Pass from agent execution
-        
+
         // Stop context
         stop_source: 'user_button',
         final_state: 'cancelled',
         has_pending_prompts: queuedPrompts.length > 0,
         pending_prompts_count: queuedPrompts.length,
       });
-      
+
       // Clean up listeners
       unlistenRefs.current.forEach(unlisten => unlisten());
       unlistenRefs.current = [];
-      
+
       // Reset states
       setIsLoading(false);
       hasActiveSessionRef.current = false;
       isListeningRef.current = false;
       setError(null);
-      
+
       // Clear queued prompts
       setQueuedPrompts([]);
-      
+
       // Add a message indicating the session was cancelled
       const cancelMessage: ClaudeStreamMessage = {
         type: "system",
@@ -1004,7 +1004,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       setMessages(prev => [...prev, cancelMessage]);
     } catch (err) {
       console.error("Failed to cancel execution:", err);
-      
+
       // Even if backend fails, we should update UI to reflect stopped state
       // Add error message but still stop the UI loading state
       const errorMessage: ClaudeStreamMessage = {
@@ -1014,11 +1014,11 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, errorMessage]);
-      
+
       // Clean up listeners anyway
       unlistenRefs.current.forEach(unlisten => unlisten());
       unlistenRefs.current = [];
-      
+
       // Reset states to allow user to continue
       setIsLoading(false);
       hasActiveSessionRef.current = false;
@@ -1035,11 +1035,11 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
   const handleConfirmFork = async () => {
     if (!forkCheckpointId || !forkSessionName.trim() || !effectiveSession) return;
-    
+
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const newSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       await api.forkFromCheckpoint(
         forkCheckpointId,
@@ -1049,11 +1049,11 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         newSessionId,
         forkSessionName
       );
-      
+
       // Open the new forked session
       // You would need to implement navigation to the new session
       console.log("Forked to new session:", newSessionId);
-      
+
       setShowForkDialog(false);
       setForkCheckpointId(null);
       setForkSessionName("");
@@ -1095,16 +1095,16 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   // Cleanup event listeners and track mount state
   useEffect(() => {
     isMountedRef.current = true;
-    
+
     return () => {
       console.log('[ClaudeCodeSession] Component unmounting, cleaning up listeners');
       isMountedRef.current = false;
       isListeningRef.current = false;
-      
+
       // Track session completion with engagement metrics
       if (effectiveSession) {
         trackEvent.sessionCompleted();
-        
+
         // Track session engagement
         const sessionDuration = sessionStartTime.current ? Date.now() - sessionStartTime.current : 0;
         const messageCount = messages.filter(m => m.user_message).length;
@@ -1115,14 +1115,14 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             tools.forEach((tool: any) => toolsUsed.add(tool.name));
           }
         });
-        
+
         // Calculate engagement score (0-100)
-        const engagementScore = Math.min(100, 
-          (messageCount * 10) + 
-          (toolsUsed.size * 5) + 
+        const engagementScore = Math.min(100,
+          (messageCount * 10) +
+          (toolsUsed.size * 5) +
           (sessionDuration > 300000 ? 20 : sessionDuration / 15000) // 5+ min session gets 20 points
         );
-        
+
         trackEvent.sessionEngagement({
           session_duration_ms: sessionDuration,
           messages_sent: messageCount,
@@ -1131,11 +1131,11 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           engagement_score: Math.round(engagementScore)
         });
       }
-      
+
       // Clean up listeners
       unlistenRefs.current.forEach(unlisten => unlisten());
       unlistenRefs.current = [];
-      
+
       // Clear checkpoint manager when session ends
       if (effectiveSession) {
         api.clearCheckpointManager(effectiveSession.id).catch(err => {
@@ -1177,8 +1177,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                   top: virtualItem.start,
                 }}
               >
-                <StreamMessage 
-                  message={message} 
+                <StreamMessage
+                  message={message}
                   streamMessages={messages}
                   onLinkDetected={handleLinkDetected}
                 />
@@ -1222,7 +1222,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   if (showPreview && isPreviewMaximized) {
     return (
       <AnimatePresence>
-        <motion.div 
+        <motion.div
           className="fixed inset-0 z-50 bg-background"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1247,438 +1247,436 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       <div className={cn("flex flex-col h-full bg-background", className)}>
         <div className="w-full h-full flex flex-col">
 
-        {/* Main Content Area */}
-        <div className={cn(
-          "flex-1 overflow-hidden transition-all duration-300",
-          showTimeline && "sm:mr-96"
-        )}>
-          {showPreview ? (
-            // Split pane layout when preview is active
-            <SplitPane
-              left={
-                <div className="h-full flex flex-col">
-                  {projectPathInput}
-                  {messagesList}
-                </div>
-              }
-              right={
-                <WebviewPreview
-                  initialUrl={previewUrl}
-                  onClose={handleClosePreview}
-                  isMaximized={isPreviewMaximized}
-                  onToggleMaximize={handleTogglePreviewMaximize}
-                  onUrlChange={handlePreviewUrlChange}
-                />
-              }
-              initialSplit={splitPosition}
-              onSplitChange={setSplitPosition}
-              minLeftWidth={400}
-              minRightWidth={400}
-              className="h-full"
-            />
-          ) : (
-            // Original layout when no preview
-            <div className="h-full flex flex-col max-w-6xl mx-auto px-6">
-              {projectPathInput}
-              {messagesList}
-              
-              {isLoading && messages.length === 0 && (
-                <div className="flex items-center justify-center h-full">
-                  <div className="flex items-center gap-3">
-                    <div className="rotating-symbol text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      {session ? "Loading session history..." : "Initializing Claude Code..."}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Floating Prompt Input - Always visible */}
-        <ErrorBoundary>
-          {/* Queued Prompts Display */}
-          <AnimatePresence>
-            {queuedPrompts.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-4"
-              >
-                <div className="bg-background/95 backdrop-blur-md border rounded-lg shadow-lg p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs font-medium text-muted-foreground mb-1">
-                      Queued Prompts ({queuedPrompts.length})
-                    </div>
-                    <TooltipSimple content={queuedPromptsCollapsed ? "Expand queue" : "Collapse queue"} side="top">
-                      <motion.div
-                        whileTap={{ scale: 0.97 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <Button variant="ghost" size="icon" onClick={() => setQueuedPromptsCollapsed(prev => !prev)}>
-                          {queuedPromptsCollapsed ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                        </Button>
-                      </motion.div>
-                    </TooltipSimple>
-                  </div>
-                  {!queuedPromptsCollapsed && queuedPrompts.map((queuedPrompt, index) => (
-                    <motion.div
-                      key={queuedPrompt.id}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.15, delay: index * 0.02 }}
-                      className="flex items-start gap-2 bg-muted/50 rounded-md p-2"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium text-muted-foreground">#{index + 1}</span>
-                          <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded">
-                            {queuedPrompt.model === "opus" ? "Opus" : "Sonnet"}
-                          </span>
-                        </div>
-                        <p className="text-sm line-clamp-2 break-words">{queuedPrompt.prompt}</p>
-                      </div>
-                      <motion.div
-                        whileTap={{ scale: 0.97 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 flex-shrink-0"
-                          onClick={() => setQueuedPrompts(prev => prev.filter(p => p.id !== queuedPrompt.id))}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </motion.div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Navigation Arrows - positioned above prompt bar with spacing */}
-          {displayableMessages.length > 5 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ delay: 0.5 }}
-              className="fixed bottom-32 right-6 z-50"
-            >
-              <div className="flex items-center bg-background/95 backdrop-blur-md border rounded-full shadow-lg overflow-hidden">
-                <TooltipSimple content="Scroll to top" side="top">
-                  <motion.div
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                      // Use virtualizer to scroll to the first item
-                      if (displayableMessages.length > 0) {
-                        // Scroll to top of the container
-                        parentRef.current?.scrollTo({
-                          top: 0,
-                          behavior: 'smooth'
-                        });
-                        
-                        // After smooth scroll completes, trigger a small scroll to ensure rendering
-                        setTimeout(() => {
-                          if (parentRef.current) {
-                            // Scroll down 1px then back to 0 to trigger virtualizer update
-                            parentRef.current.scrollTop = 1;
-                            requestAnimationFrame(() => {
-                              if (parentRef.current) {
-                                parentRef.current.scrollTop = 0;
-                              }
-                            });
-                          }
-                        }, 500); // Wait for smooth scroll to complete
-                      }
-                    }}
-                      className="px-3 py-2 hover:bg-accent rounded-none"
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                </TooltipSimple>
-                <div className="w-px h-4 bg-border" />
-                <TooltipSimple content="Scroll to bottom" side="top">
-                  <motion.div
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                      // Use virtualizer to scroll to the last item
-                      if (displayableMessages.length > 0) {
-                        // Scroll to bottom of the container
-                        const scrollElement = parentRef.current;
-                        if (scrollElement) {
-                          scrollElement.scrollTo({
-                            top: scrollElement.scrollHeight,
-                            behavior: 'smooth'
-                          });
-                        }
-                      }
-                    }}
-                      className="px-3 py-2 hover:bg-accent rounded-none"
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                </TooltipSimple>
-              </div>
-            </motion.div>
-          )}
-
+          {/* Main Content Area */}
           <div className={cn(
-            "fixed bottom-0 left-0 right-0 transition-all duration-300 z-50",
-            showTimeline && "sm:right-96"
+            "flex-1 overflow-hidden transition-all duration-300",
+            showTimeline && "sm:mr-96"
           )}>
-            <FloatingPromptInput
-              ref={floatingPromptRef}
-              onSend={handleSendPrompt}
-              onCancel={handleCancelExecution}
-              isLoading={isLoading}
-              disabled={!projectPath}
-              projectPath={projectPath}
-              extraMenuItems={
-                <>
-                  {effectiveSession && (
-                    <TooltipSimple content="Session Timeline" side="top">
-                      <motion.div
-                        whileTap={{ scale: 0.97 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setShowTimeline(!showTimeline)}
-                          className="h-9 w-9 text-muted-foreground hover:text-foreground"
+            {showPreview ? (
+              // Split pane layout when preview is active
+              <SplitPane
+                left={
+                  <div className="h-full flex flex-col">
+                    {projectPathInput}
+                    {messagesList}
+                  </div>
+                }
+                right={
+                  <WebviewPreview
+                    initialUrl={previewUrl}
+                    onClose={handleClosePreview}
+                    isMaximized={isPreviewMaximized}
+                    onToggleMaximize={handleTogglePreviewMaximize}
+                    onUrlChange={handlePreviewUrlChange}
+                  />
+                }
+                initialSplit={splitPosition}
+                onSplitChange={setSplitPosition}
+                minLeftWidth={400}
+                minRightWidth={400}
+                className="h-full"
+              />
+            ) : (
+              // Original layout when no preview
+              <div className="h-full flex flex-col max-w-6xl mx-auto px-6">
+                {projectPathInput}
+                {messagesList}
+
+                {isLoading && messages.length === 0 && (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center gap-3">
+                      <div className="rotating-symbol text-primary" />
+                      <span className="text-sm text-muted-foreground">
+                        {session ? "Loading session history..." : "Initializing Claude Code..."}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Floating Prompt Input - Always visible */}
+          <ErrorBoundary>
+            {/* Queued Prompts Display */}
+            <AnimatePresence>
+              {queuedPrompts.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-4"
+                >
+                  <div className="bg-background/95 backdrop-blur-md border rounded-lg shadow-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-medium text-muted-foreground mb-1">
+                        Queued Prompts ({queuedPrompts.length})
+                      </div>
+                      <TooltipSimple content={queuedPromptsCollapsed ? "Expand queue" : "Collapse queue"} side="top">
+                        <motion.div
+                          whileTap={{ scale: 0.97 }}
+                          transition={{ duration: 0.15 }}
                         >
-                          <GitBranch className={cn("h-3.5 w-3.5", showTimeline && "text-primary")} />
-                        </Button>
-                      </motion.div>
-                    </TooltipSimple>
-                  )}
-                  {messages.length > 0 && (
-                    <Popover
-                      trigger={
-                        <TooltipSimple content="Copy conversation" side="top">
-                          <motion.div
-                            whileTap={{ scale: 0.97 }}
-                            transition={{ duration: 0.15 }}
-                          >
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-9 w-9 text-muted-foreground hover:text-foreground"
-                            >
-                              <Copy className="h-3.5 w-3.5" />
-                            </Button>
-                          </motion.div>
-                        </TooltipSimple>
-                      }
-                      content={
-                        <div className="w-44 p-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCopyAsMarkdown}
-                            className="w-full justify-start text-xs"
-                          >
-                            Copy as Markdown
+                          <Button variant="ghost" size="icon" onClick={() => setQueuedPromptsCollapsed(prev => !prev)}>
+                            {queuedPromptsCollapsed ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCopyAsJsonl}
-                            className="w-full justify-start text-xs"
-                          >
-                            Copy as JSONL
-                          </Button>
+                        </motion.div>
+                      </TooltipSimple>
+                    </div>
+                    {!queuedPromptsCollapsed && queuedPrompts.map((queuedPrompt, index) => (
+                      <motion.div
+                        key={queuedPrompt.id}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.15, delay: index * 0.02 }}
+                        className="flex items-start gap-2 bg-muted/50 rounded-md p-2"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-medium text-muted-foreground">#{index + 1}</span>
+                            <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded">
+                              {queuedPrompt.model === "opus" ? "Opus" : "Sonnet"}
+                            </span>
+                          </div>
+                          <p className="text-sm line-clamp-2 break-words">{queuedPrompt.prompt}</p>
                         </div>
-                      }
-                      open={copyPopoverOpen}
-                      onOpenChange={setCopyPopoverOpen}
-                      side="top"
-                      align="end"
-                    />
-                  )}
-                  <TooltipSimple content="Checkpoint Settings" side="top">
+                        <motion.div
+                          whileTap={{ scale: 0.97 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 flex-shrink-0"
+                            onClick={() => setQueuedPrompts(prev => prev.filter(p => p.id !== queuedPrompt.id))}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Navigation Arrows - positioned above prompt bar with spacing */}
+            {displayableMessages.length > 5 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ delay: 0.5 }}
+                className="fixed bottom-32 right-6 z-50"
+              >
+                <div className="flex items-center bg-background/95 backdrop-blur-md border rounded-full shadow-lg overflow-hidden">
+                  <TooltipSimple content="Scroll to top" side="top">
                     <motion.div
                       whileTap={{ scale: 0.97 }}
                       transition={{ duration: 0.15 }}
                     >
                       <Button
                         variant="ghost"
-                        size="icon"
-                        onClick={() => setShowSettings(!showSettings)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        size="sm"
+                        onClick={() => {
+                          // Use virtualizer to scroll to the first item
+                          if (displayableMessages.length > 0) {
+                            // Scroll to top of the container
+                            parentRef.current?.scrollTo({
+                              top: 0,
+                              behavior: 'smooth'
+                            });
+
+                            // After smooth scroll completes, trigger a small scroll to ensure rendering
+                            setTimeout(() => {
+                              if (parentRef.current) {
+                                // Scroll down 1px then back to 0 to trigger virtualizer update
+                                parentRef.current.scrollTop = 1;
+                                requestAnimationFrame(() => {
+                                  if (parentRef.current) {
+                                    parentRef.current.scrollTop = 0;
+                                  }
+                                });
+                              }
+                            }, 500); // Wait for smooth scroll to complete
+                          }
+                        }}
+                        className="px-3 py-2 hover:bg-accent rounded-none"
                       >
-                        <Wrench className={cn("h-3.5 w-3.5", showSettings && "text-primary")} />
+                        <ChevronUp className="h-4 w-4" />
                       </Button>
                     </motion.div>
                   </TooltipSimple>
-                  {/* Health Countdown aligned next to Checkpoint Settings */}
-                  <div className="hidden sm:block ml-2">
-                    <HealthCountdown />
-                  </div>
-                </>
-              }
-            />
-          </div>
-
-          {/* Token Counter - positioned under the Send button */}
-          {totalTokens > 0 && (
-            <div className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none">
-              <div className="max-w-6xl mx-auto">
-                <div className="flex justify-end px-4 pb-2">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="bg-background/95 backdrop-blur-md border rounded-full px-3 py-1 shadow-lg pointer-events-auto"
-                  >
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <Hash className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-mono">{totalTokens.toLocaleString()}</span>
-                      <span className="text-muted-foreground">tokens</span>
-                    </div>
-                  </motion.div>
+                  <div className="w-px h-4 bg-border" />
+                  <TooltipSimple content="Scroll to bottom" side="top">
+                    <motion.div
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          // Use virtualizer to scroll to the last item
+                          if (displayableMessages.length > 0) {
+                            // Scroll to bottom of the container
+                            const scrollElement = parentRef.current;
+                            if (scrollElement) {
+                              scrollElement.scrollTo({
+                                top: scrollElement.scrollHeight,
+                                behavior: 'smooth'
+                              });
+                            }
+                          }
+                        }}
+                        className="px-3 py-2 hover:bg-accent rounded-none"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </TooltipSimple>
                 </div>
-              </div>
-            </div>
-          )}
-        </ErrorBoundary>
+              </motion.div>
+            )}
 
-        {/* Timeline */}
-        <AnimatePresence>
-          {showTimeline && effectiveSession && (
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed right-0 top-0 h-full w-full sm:w-96 bg-background border-l border-border shadow-xl z-30 overflow-hidden"
-            >
-              <div className="h-full flex flex-col">
-                {/* Timeline Header */}
-                <div className="flex items-center justify-between p-4 border-b border-border">
-                  <h3 className="text-lg font-semibold">Session Timeline</h3>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowTimeline(false)}
-                    className="h-8 w-8"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                {/* Timeline Content */}
-                <div className="flex-1 overflow-y-auto p-4">
-                  <TimelineNavigator
-                    sessionId={effectiveSession.id}
-                    projectId={effectiveSession.project_id}
-                    projectPath={projectPath}
-                    currentMessageIndex={messages.length - 1}
-                    onCheckpointSelect={handleCheckpointSelect}
-                    onFork={handleFork}
-                    onCheckpointCreated={handleCheckpointCreated}
-                    refreshVersion={timelineVersion}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            <div className={cn(
+              "fixed bottom-0 left-0 right-0 transition-all duration-300 z-50",
+              showTimeline && "sm:right-96"
+            )}>
+              <FloatingPromptInput
+                ref={floatingPromptRef}
+                onSend={handleSendPrompt}
+                onCancel={handleCancelExecution}
+                isLoading={isLoading}
+                disabled={!projectPath}
+                projectPath={projectPath}
+                extraMenuItems={
+                  <>
+                    {effectiveSession && (
+                      <TooltipSimple content="Session Timeline" side="top">
+                        <motion.div
+                          whileTap={{ scale: 0.97 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setShowTimeline(!showTimeline)}
+                            className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                          >
+                            <GitBranch className={cn("h-3.5 w-3.5", showTimeline && "text-primary")} />
+                          </Button>
+                        </motion.div>
+                      </TooltipSimple>
+                    )}
+                    {messages.length > 0 && (
+                      <Popover
+                        trigger={
+                          <TooltipSimple content="Copy conversation" side="top">
+                            <motion.div
+                              whileTap={{ scale: 0.97 }}
+                              transition={{ duration: 0.15 }}
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </Button>
+                            </motion.div>
+                          </TooltipSimple>
+                        }
+                        content={
+                          <div className="w-44 p-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleCopyAsMarkdown}
+                              className="w-full justify-start text-xs"
+                            >
+                              Copy as Markdown
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleCopyAsJsonl}
+                              className="w-full justify-start text-xs"
+                            >
+                              Copy as JSONL
+                            </Button>
+                          </div>
+                        }
+                        open={copyPopoverOpen}
+                        onOpenChange={setCopyPopoverOpen}
+                        side="top"
+                        align="end"
+                      />
+                    )}
+                    <TooltipSimple content="Checkpoint Settings" side="top">
+                      <motion.div
+                        whileTap={{ scale: 0.97 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowSettings(!showSettings)}
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        >
+                          <Wrench className={cn("h-3.5 w-3.5", showSettings && "text-primary")} />
+                        </Button>
+                      </motion.div>
+                    </TooltipSimple>
 
-      {/* Fork Dialog */}
-      <Dialog open={showForkDialog} onOpenChange={setShowForkDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Fork Session</DialogTitle>
-            <DialogDescription>
-              Create a new session branch from the selected checkpoint.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="fork-name">New Session Name</Label>
-              <Input
-                id="fork-name"
-                placeholder="e.g., Alternative approach"
-                value={forkSessionName}
-                onChange={(e) => setForkSessionName(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter" && !isLoading) {
-                    handleConfirmFork();
-                  }
-                }}
+                  </>
+                }
               />
             </div>
-          </div>
-          
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowForkDialog(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmFork}
-              disabled={isLoading || !forkSessionName.trim()}
-            >
-              Create Fork
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Settings Dialog */}
-      {showSettings && effectiveSession && (
-        <Dialog open={showSettings} onOpenChange={setShowSettings}>
-          <DialogContent className="max-w-2xl">
-            <CheckpointSettings
-              sessionId={effectiveSession.id}
-              projectId={effectiveSession.project_id}
-              projectPath={projectPath}
-              onClose={() => setShowSettings(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+            {/* Token Counter - top right positioning */}
+            {totalTokens > 0 && (
+              <div className="fixed top-16 right-4 z-20 pointer-events-none">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="bg-background/95 backdrop-blur-md border rounded-full px-3 py-1 shadow-lg pointer-events-auto"
+                >
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Hash className="h-3 w-3 text-muted-foreground" />
+                    <span className="font-mono">{totalTokens.toLocaleString()}</span>
+                    <span className="text-muted-foreground">tokens</span>
+                  </div>
+                </motion.div>
+              </div>
+            )}
 
-      {/* Slash Commands Settings Dialog */}
-      {showSlashCommandsSettings && (
-        <Dialog open={showSlashCommandsSettings} onOpenChange={setShowSlashCommandsSettings}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+            {/* Health Countdown - top right positioning below Token Counter */}
+            <div className="[&>div]:!top-28 [&>div]:!bottom-auto [&>div]:!right-4 [&>div]:!z-20">
+              <HealthCountdown />
+            </div>
+          </ErrorBoundary>
+
+          {/* Timeline */}
+          <AnimatePresence>
+            {showTimeline && effectiveSession && (
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="fixed right-0 top-0 h-full w-full sm:w-96 bg-background border-l border-border shadow-xl z-30 overflow-hidden"
+              >
+                <div className="h-full flex flex-col">
+                  {/* Timeline Header */}
+                  <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h3 className="text-lg font-semibold">Session Timeline</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowTimeline(false)}
+                      className="h-8 w-8"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Timeline Content */}
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <TimelineNavigator
+                      sessionId={effectiveSession.id}
+                      projectId={effectiveSession.project_id}
+                      projectPath={projectPath}
+                      currentMessageIndex={messages.length - 1}
+                      onCheckpointSelect={handleCheckpointSelect}
+                      onFork={handleFork}
+                      onCheckpointCreated={handleCheckpointCreated}
+                      refreshVersion={timelineVersion}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Fork Dialog */}
+        <Dialog open={showForkDialog} onOpenChange={setShowForkDialog}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Slash Commands</DialogTitle>
+              <DialogTitle>Fork Session</DialogTitle>
               <DialogDescription>
-                Manage project-specific slash commands for {projectPath}
+                Create a new session branch from the selected checkpoint.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto">
-              <SlashCommandsManager projectPath={projectPath} />
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="fork-name">New Session Name</Label>
+                <Input
+                  id="fork-name"
+                  placeholder="e.g., Alternative approach"
+                  value={forkSessionName}
+                  onChange={(e) => setForkSessionName(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && !isLoading) {
+                      handleConfirmFork();
+                    }
+                  }}
+                />
+              </div>
             </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowForkDialog(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmFork}
+                disabled={isLoading || !forkSessionName.trim()}
+              >
+                Create Fork
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
-      )}
+
+        {/* Settings Dialog */}
+        {showSettings && effectiveSession && (
+          <Dialog open={showSettings} onOpenChange={setShowSettings}>
+            <DialogContent className="max-w-2xl">
+              <CheckpointSettings
+                sessionId={effectiveSession.id}
+                projectId={effectiveSession.project_id}
+                projectPath={projectPath}
+                onClose={() => setShowSettings(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Slash Commands Settings Dialog */}
+        {showSlashCommandsSettings && (
+          <Dialog open={showSlashCommandsSettings} onOpenChange={setShowSlashCommandsSettings}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+              <DialogHeader>
+                <DialogTitle>Slash Commands</DialogTitle>
+                <DialogDescription>
+                  Manage project-specific slash commands for {projectPath}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto">
+                <SlashCommandsManager projectPath={projectPath} />
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </TooltipProvider>
   );
