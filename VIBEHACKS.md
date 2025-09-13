@@ -1,6 +1,11 @@
 # 🧘‍♂️ code-zen • 编码禅师
 ## Vibe Hacks 2025 第一届黑客松参赛项目
 
+<div align="center">
+  <img src="images/zen.png" alt="编码禅师" width="600" style="margin: 40px 0;">
+  <br><strong style="font-size: 1.5em; color: #2563eb;">🧘‍♂️ 专注编码，禅意生活 • 身心平衡，代码优雅 🧘‍♂️</strong>
+</div>
+
 > **队名**：东风巨浪  
 > **口号**：东风巨浪，万码齐放  
 > **时间**：2025年9月13日  
@@ -46,8 +51,8 @@
 ## 🎯 产品介绍
 
 <div align="center">
-  <img src="images/zen.png" alt="编码禅师" width="200" style="margin-bottom: 20px;">
-  <br><strong>编码禅师 - 专注与平静的守护者</strong>
+  <img src="images/zen.png" alt="编码禅师" width="400" style="margin: 30px 0;">
+  <br><strong style="font-size: 1.3em;">🧘‍♂️ 编码禅师 - 专注与平静的守护者 🧘‍♂️</strong>
 </div>
 
 <div align="center">

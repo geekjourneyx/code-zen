@@ -22,8 +22,8 @@
 **code-zen** 是基于 [opcode](https://github.com/getAsterisk/opcode/) 二次开发的项目，**专为 [Vibe Hacks 第一届黑客松](VIBEHACKS.md) 打造**。在保留原版所有功能的基础上，重点增加了**开发者身心平衡管理功能**。
 
 <div align="center">
-  <img src="images/zen.png" alt="编码禅师" width="300" style="margin: 20px 0;">
-  <br><em>编码禅师 - 专注与平静的守护者</em>
+  <img src="images/zen.png" alt="编码禅师" width="500" style="margin: 30px 0;">
+  <br><strong style="font-size: 1.2em;">🧘‍♂️ 编码禅师 - 专注与平静的守护者 🧘‍♂️</strong>
 </div>
 
 ### 编码禅师的由来
