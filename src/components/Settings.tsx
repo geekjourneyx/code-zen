@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Plus, 
-  Trash2, 
-  Save, 
+import {
+  Plus,
+  Trash2,
+  Save,
   AlertCircle,
   Loader2,
   Shield,
@@ -17,8 +17,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { 
-  api, 
+import {
+  api,
   type ClaudeSettings,
   type ClaudeInstallation
 } from "@/lib/api";
@@ -72,32 +72,32 @@ export const Settings: React.FC<SettingsProps> = ({
   const [selectedInstallation, setSelectedInstallation] = useState<ClaudeInstallation | null>(null);
   const [binaryPathChanged, setBinaryPathChanged] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  
+
   // VibeGuard settings
-  const [vgNudgeLevel, setVgNudgeLevel] = useState<'gentle'|'active'>('gentle');
-  
+  const [vgNudgeLevel, setVgNudgeLevel] = useState<'gentle' | 'active'>('gentle');
+
   // Permission rules state
   const [allowRules, setAllowRules] = useState<PermissionRule[]>([]);
   const [denyRules, setDenyRules] = useState<PermissionRule[]>([]);
-  
+
   // Environment variables state
   const [envVars, setEnvVars] = useState<EnvironmentVariable[]>([]);
-  
+
   // Hooks state
   const [userHooksChanged, setUserHooksChanged] = useState(false);
   const getUserHooks = React.useRef<(() => any) | null>(null);
-  
+
   // Theme hook
   const { theme, setTheme, customColors, setCustomColors } = useTheme();
-  
+
   // Proxy state
   const [proxySettingsChanged, setProxySettingsChanged] = useState(false);
   const saveProxySettings = React.useRef<(() => Promise<void>) | null>(null);
-  
+
   // Analytics state
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const trackEvent = useTrackEvent();
-  
+
   // Tab persistence state
   const [tabPersistenceEnabled, setTabPersistenceEnabled] = useState(true);
   // Startup intro preference
@@ -115,8 +115,8 @@ export const Settings: React.FC<SettingsProps> = ({
   const [healthEyeMin, setHealthEyeMin] = useState<number>(20);
   const [healthEyeDuration, setHealthEyeDuration] = useState<number>(20);
   const [healthBreakpoints, setHealthBreakpoints] = useState<boolean>(true);
-  const [healthFlowProtection, setHealthFlowProtection] = useState<'low'|'mid'|'high'>('mid');
-  
+  const [healthFlowProtection, setHealthFlowProtection] = useState<'low' | 'mid' | 'high'>('mid');
+
   // Load settings on mount
   useEffect(() => {
     loadSettings();
@@ -182,14 +182,14 @@ export const Settings: React.FC<SettingsProps> = ({
       setLoading(true);
       setError(null);
       const loadedSettings = await api.getClaudeSettings();
-      
+
       // Ensure loadedSettings is an object
       if (!loadedSettings || typeof loadedSettings !== 'object') {
         console.warn("Loaded settings is not an object:", loadedSettings);
         setSettings({});
         return;
       }
-      
+
       setSettings(loadedSettings);
 
       // Parse permissions
@@ -279,15 +279,17 @@ export const Settings: React.FC<SettingsProps> = ({
       }
 
       // Save Health prefs (new structure)
-      await invoke('health_set_prefs', { prefs: {
-        intervals: { activity: healthActivityMin, eye: healthEyeMin, eye_duration_sec: healthEyeDuration },
-        context: { breakpoints: healthBreakpoints, flow_protection: healthFlowProtection },
-        alerts: { strength: vgNudgeLevel },
-        nightly_hour: healthNightlyHour,
-        quiet_hours: [healthQuietHours],
-        dnd: healthDnd,
-        retention: { max_per_day: healthRetentionMax, ttl_days: healthRetentionTtl },
-      } });
+      await invoke('health_set_prefs', {
+        prefs: {
+          intervals: { activity: healthActivityMin, eye: healthEyeMin, eye_duration_sec: healthEyeDuration },
+          context: { breakpoints: healthBreakpoints, flow_protection: healthFlowProtection },
+          alerts: { strength: vgNudgeLevel },
+          nightly_hour: healthNightlyHour,
+          quiet_hours: [healthQuietHours],
+          dnd: healthDnd,
+          retention: { max_per_day: healthRetentionMax, ttl_days: healthRetentionTtl },
+        }
+      });
 
       setToast({ message: "Settings saved successfully!", type: "success" });
     } catch (err) {
@@ -314,7 +316,7 @@ export const Settings: React.FC<SettingsProps> = ({
       id: `${type}-${Date.now()}`,
       value: "",
     };
-    
+
     if (type === "allow") {
       setAllowRules(prev => [...prev, newRule]);
     } else {
@@ -327,11 +329,11 @@ export const Settings: React.FC<SettingsProps> = ({
    */
   const updatePermissionRule = (type: "allow" | "deny", id: string, value: string) => {
     if (type === "allow") {
-      setAllowRules(prev => prev.map(rule => 
+      setAllowRules(prev => prev.map(rule =>
         rule.id === id ? { ...rule, value } : rule
       ));
     } else {
-      setDenyRules(prev => prev.map(rule => 
+      setDenyRules(prev => prev.map(rule =>
         rule.id === id ? { ...rule, value } : rule
       ));
     }
@@ -364,7 +366,7 @@ export const Settings: React.FC<SettingsProps> = ({
    * Updates an environment variable
    */
   const updateEnvVar = (id: string, field: "key" | "value", value: string) => {
-    setEnvVars(prev => prev.map(envVar => 
+    setEnvVars(prev => prev.map(envVar =>
       envVar.id === id ? { ...envVar, [field]: value } : envVar
     ));
   };
@@ -420,953 +422,951 @@ export const Settings: React.FC<SettingsProps> = ({
             </motion.div>
           </div>
         </div>
-      
-      {/* Error message */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-            className="mx-4 mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/50 flex items-center gap-2 text-body-small text-destructive"
-          >
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Content */}
-      {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-9 w-full mb-6 h-auto p-1">
-              <TabsTrigger value="general" className="py-2.5 px-3">General</TabsTrigger>
-              <TabsTrigger value="permissions" className="py-2.5 px-3">Permissions</TabsTrigger>
-              <TabsTrigger value="environment" className="py-2.5 px-3">Environment</TabsTrigger>
-              <TabsTrigger value="advanced" className="py-2.5 px-3">Advanced</TabsTrigger>
-              <TabsTrigger value="hooks" className="py-2.5 px-3">Hooks</TabsTrigger>
-              <TabsTrigger value="commands" className="py-2.5 px-3">Commands</TabsTrigger>
-              <TabsTrigger value="storage" className="py-2.5 px-3">Storage</TabsTrigger>
-              <TabsTrigger value="proxy" className="py-2.5 px-3">Proxy</TabsTrigger>
-            <TabsTrigger value="health" className="py-2.5 px-3">Health</TabsTrigger>
-            </TabsList>
-            
-            {/* General Settings */}
-            <TabsContent value="general" className="space-y-6 mt-6">
-              <Card className="p-6 space-y-6">
-                <div>
-                  <h3 className="text-heading-4 mb-4">General Settings</h3>
-                  
-                  <div className="space-y-4">
-                    {/* Theme Selector */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label>Theme</Label>
-                        <p className="text-caption text-muted-foreground mt-1">
-                          Choose your preferred color theme
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-lg">
-                        <button
-                          onClick={() => setTheme('dark')}
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                            theme === 'dark' 
-                              ? "bg-background shadow-sm" 
-                              : "hover:bg-background/50"
-                          )}
-                        >
-                          {theme === 'dark' && <Check className="h-3 w-3" />}
-                          Dark
-                        </button>
-                        <button
-                          onClick={() => setTheme('gray')}
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                            theme === 'gray' 
-                              ? "bg-background shadow-sm" 
-                              : "hover:bg-background/50"
-                          )}
-                        >
-                          {theme === 'gray' && <Check className="h-3 w-3" />}
-                          Gray
-                        </button>
-                        <button
-                          onClick={() => setTheme('light')}
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                            theme === 'light' 
-                              ? "bg-background shadow-sm" 
-                              : "hover:bg-background/50"
-                          )}
-                        >
-                          {theme === 'light' && <Check className="h-3 w-3" />}
-                          Light
-                        </button>
-                        <button
-                          onClick={() => setTheme('custom')}
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                            theme === 'custom' 
-                              ? "bg-background shadow-sm" 
-                              : "hover:bg-background/50"
-                          )}
-                        >
-                          {theme === 'custom' && <Check className="h-3 w-3" />}
-                          Custom
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Custom Color Editor */}
-                    {theme === 'custom' && (
-                      <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-                        <h4 className="text-label">Custom Theme Colors</h4>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          {/* Background Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-background" className="text-caption">Background</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-background"
-                                type="text"
-                                value={customColors.background}
-                                onChange={(e) => setCustomColors({ background: e.target.value })}
-                                placeholder="oklch(0.12 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.background }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Foreground Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-foreground" className="text-caption">Foreground</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-foreground"
-                                type="text"
-                                value={customColors.foreground}
-                                onChange={(e) => setCustomColors({ foreground: e.target.value })}
-                                placeholder="oklch(0.98 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.foreground }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Primary Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-primary" className="text-caption">Primary</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-primary"
-                                type="text"
-                                value={customColors.primary}
-                                onChange={(e) => setCustomColors({ primary: e.target.value })}
-                                placeholder="oklch(0.98 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.primary }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Card Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-card" className="text-caption">Card</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-card"
-                                type="text"
-                                value={customColors.card}
-                                onChange={(e) => setCustomColors({ card: e.target.value })}
-                                placeholder="oklch(0.14 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.card }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Accent Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-accent" className="text-caption">Accent</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-accent"
-                                type="text"
-                                value={customColors.accent}
-                                onChange={(e) => setCustomColors({ accent: e.target.value })}
-                                placeholder="oklch(0.16 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.accent }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Destructive Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-destructive" className="text-caption">Destructive</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-destructive"
-                                type="text"
-                                value={customColors.destructive}
-                                onChange={(e) => setCustomColors({ destructive: e.target.value })}
-                                placeholder="oklch(0.6 0.2 25)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.destructive }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <p className="text-caption text-muted-foreground">
-                          Use CSS color values (hex, rgb, oklch, etc.). Changes apply immediately.
-                        </p>
-                      </div>
-                    )}
-                    
-                    {/* Include Co-authored By */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5 flex-1">
-                        <Label htmlFor="coauthored">Include "Co-authored by Claude"</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Add Claude attribution to git commits and pull requests
-                        </p>
-                      </div>
-                      <Switch
-                        id="coauthored"
-                        checked={settings?.includeCoAuthoredBy !== false}
-                        onCheckedChange={(checked) => updateSetting("includeCoAuthoredBy", checked)}
-                      />
-                    </div>
-                    
-                    {/* Verbose Output */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5 flex-1">
-                        <Label htmlFor="verbose">Verbose Output</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Show full bash and command outputs
-                        </p>
-                      </div>
-                      <Switch
-                        id="verbose"
-                        checked={settings?.verbose === true}
-                        onCheckedChange={(checked) => updateSetting("verbose", checked)}
-                      />
-                    </div>
-                    
-                    {/* Cleanup Period */}
-                    <div className="space-y-2">
+
+        {/* Error message */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="mx-4 mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/50 flex items-center gap-2 text-body-small text-destructive"
+            >
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Content */}
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid grid-cols-9 w-full mb-6 h-auto p-1">
+                <TabsTrigger value="general" className="py-2.5 px-3">General</TabsTrigger>
+                <TabsTrigger value="permissions" className="py-2.5 px-3">Permissions</TabsTrigger>
+                <TabsTrigger value="environment" className="py-2.5 px-3">Environment</TabsTrigger>
+                <TabsTrigger value="advanced" className="py-2.5 px-3">Advanced</TabsTrigger>
+                <TabsTrigger value="hooks" className="py-2.5 px-3">Hooks</TabsTrigger>
+                <TabsTrigger value="commands" className="py-2.5 px-3">Commands</TabsTrigger>
+                <TabsTrigger value="storage" className="py-2.5 px-3">Storage</TabsTrigger>
+                <TabsTrigger value="proxy" className="py-2.5 px-3">Proxy</TabsTrigger>
+                <TabsTrigger value="health" className="py-2.5 px-3">Health</TabsTrigger>
+              </TabsList>
+
+              {/* General Settings */}
+              <TabsContent value="general" className="space-y-6 mt-6">
+                <Card className="p-6 space-y-6">
+                  <div>
+                    <h3 className="text-heading-4 mb-4">General Settings</h3>
+
+                    <div className="space-y-4">
+                      {/* Theme Selector */}
                       <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <Label htmlFor="cleanup">Chat Transcript Retention (days)</Label>
+                        <div>
+                          <Label>Theme</Label>
                           <p className="text-caption text-muted-foreground mt-1">
-                            How long to retain chat transcripts locally (default: 30 days)
+                            Choose your preferred color theme
                           </p>
                         </div>
-                        <Input
-                          id="cleanup"
-                          type="number"
-                          min="1"
-                          placeholder="30"
-                          value={settings?.cleanupPeriodDays || ""}
-                          onChange={(e) => {
-                            const value = e.target.value ? parseInt(e.target.value) : undefined;
-                            updateSetting("cleanupPeriodDays", value);
+                        <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-lg">
+                          <Button
+                            variant={theme === 'dark' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setTheme('dark')}
+                            className="gap-1.5 text-xs"
+                          >
+                            {theme === 'dark' && <Check className="h-3 w-3" />}
+                            Dark
+                          </Button>
+                          <Button
+                            variant={theme === 'gray' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setTheme('gray')}
+                            className="gap-1.5 text-xs"
+                          >
+                            {theme === 'gray' && <Check className="h-3 w-3" />}
+                            Gray
+                          </Button>
+                          <Button
+                            variant={theme === 'light' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setTheme('light')}
+                            className="gap-1.5 text-xs"
+                          >
+                            {theme === 'light' && <Check className="h-3 w-3" />}
+                            Light
+                          </Button>
+                          <Button
+                            variant={theme === 'custom' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setTheme('custom')}
+                            className="gap-1.5 text-xs"
+                          >
+                            {theme === 'custom' && <Check className="h-3 w-3" />}
+                            Custom
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Custom Color Editor */}
+                      {theme === 'custom' && (
+                        <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+                          <h4 className="text-label">Custom Theme Colors</h4>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* Background Color */}
+                            <div className="space-y-2">
+                              <Label htmlFor="color-background" className="text-caption">Background</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="color-background"
+                                  type="text"
+                                  value={customColors.background}
+                                  onChange={(e) => setCustomColors({ background: e.target.value })}
+                                  placeholder="oklch(0.12 0.01 240)"
+                                  className="font-mono text-xs"
+                                />
+                                <div
+                                  className="w-10 h-10 rounded border"
+                                  style={{ backgroundColor: customColors.background }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Foreground Color */}
+                            <div className="space-y-2">
+                              <Label htmlFor="color-foreground" className="text-caption">Foreground</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="color-foreground"
+                                  type="text"
+                                  value={customColors.foreground}
+                                  onChange={(e) => setCustomColors({ foreground: e.target.value })}
+                                  placeholder="oklch(0.98 0.01 240)"
+                                  className="font-mono text-xs"
+                                />
+                                <div
+                                  className="w-10 h-10 rounded border"
+                                  style={{ backgroundColor: customColors.foreground }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Primary Color */}
+                            <div className="space-y-2">
+                              <Label htmlFor="color-primary" className="text-caption">Primary</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="color-primary"
+                                  type="text"
+                                  value={customColors.primary}
+                                  onChange={(e) => setCustomColors({ primary: e.target.value })}
+                                  placeholder="oklch(0.98 0.01 240)"
+                                  className="font-mono text-xs"
+                                />
+                                <div
+                                  className="w-10 h-10 rounded border"
+                                  style={{ backgroundColor: customColors.primary }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Card Color */}
+                            <div className="space-y-2">
+                              <Label htmlFor="color-card" className="text-caption">Card</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="color-card"
+                                  type="text"
+                                  value={customColors.card}
+                                  onChange={(e) => setCustomColors({ card: e.target.value })}
+                                  placeholder="oklch(0.14 0.01 240)"
+                                  className="font-mono text-xs"
+                                />
+                                <div
+                                  className="w-10 h-10 rounded border"
+                                  style={{ backgroundColor: customColors.card }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Accent Color */}
+                            <div className="space-y-2">
+                              <Label htmlFor="color-accent" className="text-caption">Accent</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="color-accent"
+                                  type="text"
+                                  value={customColors.accent}
+                                  onChange={(e) => setCustomColors({ accent: e.target.value })}
+                                  placeholder="oklch(0.16 0.01 240)"
+                                  className="font-mono text-xs"
+                                />
+                                <div
+                                  className="w-10 h-10 rounded border"
+                                  style={{ backgroundColor: customColors.accent }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Destructive Color */}
+                            <div className="space-y-2">
+                              <Label htmlFor="color-destructive" className="text-caption">Destructive</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="color-destructive"
+                                  type="text"
+                                  value={customColors.destructive}
+                                  onChange={(e) => setCustomColors({ destructive: e.target.value })}
+                                  placeholder="oklch(0.6 0.2 25)"
+                                  className="font-mono text-xs"
+                                />
+                                <div
+                                  className="w-10 h-10 rounded border"
+                                  style={{ backgroundColor: customColors.destructive }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className="text-caption text-muted-foreground">
+                            Use CSS color values (hex, rgb, oklch, etc.). Changes apply immediately.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Include Co-authored By */}
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5 flex-1">
+                          <Label htmlFor="coauthored">Include "Co-authored by Claude"</Label>
+                          <p className="text-caption text-muted-foreground">
+                            Add Claude attribution to git commits and pull requests
+                          </p>
+                        </div>
+                        <Switch
+                          id="coauthored"
+                          checked={settings?.includeCoAuthoredBy !== false}
+                          onCheckedChange={(checked) => updateSetting("includeCoAuthoredBy", checked)}
+                        />
+                      </div>
+
+                      {/* Verbose Output */}
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5 flex-1">
+                          <Label htmlFor="verbose">Verbose Output</Label>
+                          <p className="text-caption text-muted-foreground">
+                            Show full bash and command outputs
+                          </p>
+                        </div>
+                        <Switch
+                          id="verbose"
+                          checked={settings?.verbose === true}
+                          onCheckedChange={(checked) => updateSetting("verbose", checked)}
+                        />
+                      </div>
+
+                      {/* Cleanup Period */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <Label htmlFor="cleanup">Chat Transcript Retention (days)</Label>
+                            <p className="text-caption text-muted-foreground mt-1">
+                              How long to retain chat transcripts locally (default: 30 days)
+                            </p>
+                          </div>
+                          <Input
+                            id="cleanup"
+                            type="number"
+                            min="1"
+                            placeholder="30"
+                            value={settings?.cleanupPeriodDays || ""}
+                            onChange={(e) => {
+                              const value = e.target.value ? parseInt(e.target.value) : undefined;
+                              updateSetting("cleanupPeriodDays", value);
+                            }}
+                            className="w-24"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Claude Binary Path Selector */}
+                      <div className="space-y-3">
+                        <ClaudeVersionSelector
+                          selectedPath={currentBinaryPath}
+                          onSelect={handleClaudeInstallationSelect}
+                          simplified={true}
+                        />
+                        {binaryPathChanged && (
+                          <p className="text-caption text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            Changes will be applied when you save settings.
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Separator */}
+                      <div className="border-t border-border pt-4 mt-6" />
+
+                      {/* Analytics Toggle */}
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <Label htmlFor="analytics-enabled">Enable Analytics</Label>
+                          <p className="text-caption text-muted-foreground">
+                            Help improve opcode by sharing anonymous usage data
+                          </p>
+                        </div>
+                        <Switch
+                          id="analytics-enabled"
+                          checked={analyticsEnabled}
+                          onCheckedChange={async (checked) => {
+                            if (checked) {
+                              await analytics.enable();
+                              setAnalyticsEnabled(true);
+                              trackEvent.settingsChanged('analytics_enabled', true);
+                              setToast({ message: "Analytics enabled", type: "success" });
+                            } else {
+                              await analytics.disable();
+                              setAnalyticsEnabled(false);
+                              trackEvent.settingsChanged('analytics_enabled', false);
+                              setToast({ message: "Analytics disabled", type: "success" });
+                            }
                           }}
-                          className="w-24"
+                        />
+                      </div>
+
+                      {/* Privacy Info */}
+                      {analyticsEnabled && (
+                        <div className="rounded-lg border border-border bg-muted/50 p-3">
+                          <div className="flex gap-2">
+                            <Shield className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-xs font-medium text-foreground">Your privacy is protected</p>
+                              <ul className="text-xs text-muted-foreground space-y-0.5">
+                                <li>• No personal information or file contents collected</li>
+                                <li>• All data is anonymous with random IDs</li>
+                                <li>• You can disable analytics at any time</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tab Persistence Toggle */}
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <Label htmlFor="tab-persistence">Remember Open Tabs</Label>
+                          <p className="text-caption text-muted-foreground">
+                            Restore your tabs when you restart the app
+                          </p>
+                        </div>
+                        <Switch
+                          id="tab-persistence"
+                          checked={tabPersistenceEnabled}
+                          onCheckedChange={(checked) => {
+                            TabPersistenceService.setEnabled(checked);
+                            setTabPersistenceEnabled(checked);
+                            trackEvent.settingsChanged('tab_persistence_enabled', checked);
+                            setToast({
+                              message: checked
+                                ? "Tab persistence enabled - your tabs will be restored on restart"
+                                : "Tab persistence disabled - tabs will not be saved",
+                              type: "success"
+                            });
+                          }}
+                        />
+                      </div>
+
+                      {/* Startup Intro Toggle */}
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <Label htmlFor="startup-intro">Show Welcome Intro on Startup</Label>
+                          <p className="text-caption text-muted-foreground">
+                            Display a brief welcome animation when the app launches
+                          </p>
+                        </div>
+                        <Switch
+                          id="startup-intro"
+                          checked={startupIntroEnabled}
+                          onCheckedChange={async (checked) => {
+                            setStartupIntroEnabled(checked);
+                            try {
+                              await api.saveSetting('startup_intro_enabled', checked ? 'true' : 'false');
+                              trackEvent.settingsChanged('startup_intro_enabled', checked);
+                              setToast({
+                                message: checked
+                                  ? 'Welcome intro enabled'
+                                  : 'Welcome intro disabled',
+                                type: 'success'
+                              });
+                            } catch (e) {
+                              setToast({ message: 'Failed to update preference', type: 'error' });
+                            }
+                          }}
                         />
                       </div>
                     </div>
-                    
-                    {/* Claude Binary Path Selector */}
-                    <div className="space-y-3">
-                      <ClaudeVersionSelector
-                        selectedPath={currentBinaryPath}
-                        onSelect={handleClaudeInstallationSelect}
-                        simplified={true}
-                      />
-                      {binaryPathChanged && (
-                        <p className="text-caption text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          Changes will be applied when you save settings.
-                        </p>
-                      )}
-                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
 
-                    {/* Separator */}
-                    <div className="border-t border-border pt-4 mt-6" />
-                    
-                    {/* Analytics Toggle */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label htmlFor="analytics-enabled">Enable Analytics</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Help improve opcode by sharing anonymous usage data
-                        </p>
-                      </div>
-                      <Switch
-                        id="analytics-enabled"
-                        checked={analyticsEnabled}
-                        onCheckedChange={async (checked) => {
-                          if (checked) {
-                            await analytics.enable();
-                            setAnalyticsEnabled(true);
-                            trackEvent.settingsChanged('analytics_enabled', true);
-                            setToast({ message: "Analytics enabled", type: "success" });
-                          } else {
-                            await analytics.disable();
-                            setAnalyticsEnabled(false);
-                            trackEvent.settingsChanged('analytics_enabled', false);
-                            setToast({ message: "Analytics disabled", type: "success" });
-                          }
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Privacy Info */}
-                    {analyticsEnabled && (
-                      <div className="rounded-lg border border-border bg-muted/50 p-3">
-                        <div className="flex gap-2">
-                          <Shield className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium text-foreground">Your privacy is protected</p>
-                            <ul className="text-xs text-muted-foreground space-y-0.5">
-                              <li>• No personal information or file contents collected</li>
-                              <li>• All data is anonymous with random IDs</li>
-                              <li>• You can disable analytics at any time</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Tab Persistence Toggle */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label htmlFor="tab-persistence">Remember Open Tabs</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Restore your tabs when you restart the app
-                        </p>
-                      </div>
-                      <Switch
-                        id="tab-persistence"
-                        checked={tabPersistenceEnabled}
-                        onCheckedChange={(checked) => {
-                          TabPersistenceService.setEnabled(checked);
-                          setTabPersistenceEnabled(checked);
-                          trackEvent.settingsChanged('tab_persistence_enabled', checked);
-                          setToast({ 
-                            message: checked 
-                              ? "Tab persistence enabled - your tabs will be restored on restart" 
-                              : "Tab persistence disabled - tabs will not be saved", 
-                            type: "success" 
-                          });
-                        }}
-                      />
-                    </div>
-
-                    {/* Startup Intro Toggle */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label htmlFor="startup-intro">Show Welcome Intro on Startup</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Display a brief welcome animation when the app launches
-                        </p>
-                      </div>
-                      <Switch
-                        id="startup-intro"
-                        checked={startupIntroEnabled}
-                        onCheckedChange={async (checked) => {
-                          setStartupIntroEnabled(checked);
-                          try {
-                            await api.saveSetting('startup_intro_enabled', checked ? 'true' : 'false');
-                            trackEvent.settingsChanged('startup_intro_enabled', checked);
-                            setToast({ 
-                              message: checked 
-                                ? 'Welcome intro enabled' 
-                                : 'Welcome intro disabled', 
-                              type: 'success' 
-                            });
-                          } catch (e) {
-                            setToast({ message: 'Failed to update preference', type: 'error' });
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-            
-            {/* Permissions Settings */}
-            <TabsContent value="permissions" className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-heading-4 mb-2">Permission Rules</h3>
-                    <p className="text-body-small text-muted-foreground mb-4">
-                      Control which tools Claude Code can use without manual approval
-                    </p>
-                  </div>
-                  
-                  {/* Allow Rules */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-label text-green-500">Allow Rules</Label>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addPermissionRule("allow")}
-                        className="gap-2 hover:border-green-500/50 hover:text-green-500"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add Rule
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      {allowRules.length === 0 ? (
-                        <p className="text-xs text-muted-foreground py-2">
-                          No allow rules configured. Claude will ask for approval for all tools.
-                        </p>
-                      ) : (
-                        allowRules.map((rule) => (
-                          <motion.div
-                            key={rule.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="flex items-center gap-2"
-                          >
-                            <Input
-                              placeholder="e.g., Bash(npm run test:*)"
-                              value={rule.value}
-                              onChange={(e) => updatePermissionRule("allow", rule.id, e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removePermissionRule("allow", rule.id)}
-                              className="h-8 w-8"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Deny Rules */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-label text-red-500">Deny Rules</Label>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addPermissionRule("deny")}
-                        className="gap-2 hover:border-red-500/50 hover:text-red-500"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add Rule
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      {denyRules.length === 0 ? (
-                        <p className="text-xs text-muted-foreground py-2">
-                          No deny rules configured.
-                        </p>
-                      ) : (
-                        denyRules.map((rule) => (
-                          <motion.div
-                            key={rule.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="flex items-center gap-2"
-                          >
-                            <Input
-                              placeholder="e.g., Bash(curl:*)"
-                              value={rule.value}
-                              onChange={(e) => updatePermissionRule("deny", rule.id, e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removePermissionRule("deny", rule.id)}
-                              className="h-8 w-8"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="pt-2 space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                      <strong>Examples:</strong>
-                    </p>
-                    <ul className="text-caption text-muted-foreground space-y-1 ml-4">
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash</code> - Allow all bash commands</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash(npm run build)</code> - Allow exact command</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash(npm run test:*)</code> - Allow commands with prefix</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Read(~/.zshrc)</code> - Allow reading specific file</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Edit(docs/**)</code> - Allow editing files in docs directory</li>
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-            
-            {/* Environment Variables */}
-            <TabsContent value="environment" className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+              {/* Permissions Settings */}
+              <TabsContent value="permissions" className="space-y-6">
+                <Card className="p-6">
+                  <div className="space-y-6">
                     <div>
-                      <h3 className="text-heading-4">Environment Variables</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Environment variables applied to every Claude Code session
+                      <h3 className="text-heading-4 mb-2">Permission Rules</h3>
+                      <p className="text-body-small text-muted-foreground mb-4">
+                        Control which tools Claude Code can use without manual approval
                       </p>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={addEnvVar}
-                      className="gap-2"
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add Variable
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {envVars.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-2">
-                        No environment variables configured.
-                      </p>
-                    ) : (
-                      envVars.map((envVar) => (
-                        <motion.div
-                          key={envVar.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-2"
+
+                    {/* Allow Rules */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-label text-green-500">Allow Rules</Label>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addPermissionRule("allow")}
+                          className="gap-2 hover:border-green-500/50 hover:text-green-500"
                         >
-                          <Input
-                            placeholder="KEY"
-                            value={envVar.key}
-                            onChange={(e) => updateEnvVar(envVar.id, "key", e.target.value)}
-                            className="flex-1 font-mono text-sm"
-                          />
-                          <span className="text-muted-foreground">=</span>
-                          <Input
-                            placeholder="value"
-                            value={envVar.value}
-                            onChange={(e) => updateEnvVar(envVar.id, "value", e.target.value)}
-                            className="flex-1 font-mono text-sm"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeEnvVar(envVar.id)}
-                            className="h-8 w-8 hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </motion.div>
-                      ))
-                    )}
-                  </div>
-                  
-                  <div className="pt-2 space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                      <strong>Common variables:</strong>
-                    </p>
-                    <ul className="text-caption text-muted-foreground space-y-1 ml-4">
-                      <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">CLAUDE_CODE_ENABLE_TELEMETRY</code> - Enable/disable telemetry (0 or 1)</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">ANTHROPIC_MODEL</code> - Custom model name</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">DISABLE_COST_WARNINGS</code> - Disable cost warnings (1)</li>
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-            {/* Advanced Settings */}
-            <TabsContent value="advanced" className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-base font-semibold mb-4">Advanced Settings</h3>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      Additional configuration options for advanced users
-                    </p>
-                  </div>
-                  
-                  {/* API Key Helper */}
-                  <div className="space-y-2">
-                    <Label htmlFor="apiKeyHelper">API Key Helper Script</Label>
-                    <Input
-                      id="apiKeyHelper"
-                      placeholder="/path/to/generate_api_key.sh"
-                      value={settings?.apiKeyHelper || ""}
-                      onChange={(e) => updateSetting("apiKeyHelper", e.target.value || undefined)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Custom script to generate auth values for API requests
-                    </p>
-                  </div>
-                  
-                  {/* Raw JSON Editor */}
-                  <div className="space-y-2">
-                    <Label>Raw Settings (JSON)</Label>
-                    <div className="p-3 rounded-md bg-muted font-mono text-xs overflow-x-auto whitespace-pre-wrap">
-                      <pre>{JSON.stringify(settings, null, 2)}</pre>
+                          <Plus className="h-3 w-3" />
+                          Add Rule
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        {allowRules.length === 0 ? (
+                          <p className="text-xs text-muted-foreground py-2">
+                            No allow rules configured. Claude will ask for approval for all tools.
+                          </p>
+                        ) : (
+                          allowRules.map((rule) => (
+                            <motion.div
+                              key={rule.id}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.15 }}
+                              className="flex items-center gap-2"
+                            >
+                              <Input
+                                placeholder="e.g., Bash(npm run test:*)"
+                                value={rule.value}
+                                onChange={(e) => updatePermissionRule("allow", rule.id, e.target.value)}
+                                className="flex-1"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removePermissionRule("allow", rule.id)}
+                                className="h-8 w-8"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </motion.div>
+                          ))
+                        )}
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      This shows the raw JSON that will be saved to ~/.claude/settings.json
-                    </p>
+
+                    {/* Deny Rules */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-label text-red-500">Deny Rules</Label>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addPermissionRule("deny")}
+                          className="gap-2 hover:border-red-500/50 hover:text-red-500"
+                        >
+                          <Plus className="h-3 w-3" />
+                          Add Rule
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        {denyRules.length === 0 ? (
+                          <p className="text-xs text-muted-foreground py-2">
+                            No deny rules configured.
+                          </p>
+                        ) : (
+                          denyRules.map((rule) => (
+                            <motion.div
+                              key={rule.id}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.15 }}
+                              className="flex items-center gap-2"
+                            >
+                              <Input
+                                placeholder="e.g., Bash(curl:*)"
+                                value={rule.value}
+                                onChange={(e) => updatePermissionRule("deny", rule.id, e.target.value)}
+                                className="flex-1"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removePermissionRule("deny", rule.id)}
+                                className="h-8 w-8"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </motion.div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 space-y-2">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Examples:</strong>
+                      </p>
+                      <ul className="text-caption text-muted-foreground space-y-1 ml-4">
+                        <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash</code> - Allow all bash commands</li>
+                        <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash(npm run build)</code> - Allow exact command</li>
+                        <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash(npm run test:*)</code> - Allow commands with prefix</li>
+                        <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Read(~/.zshrc)</code> - Allow reading specific file</li>
+                        <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Edit(docs/**)</code> - Allow editing files in docs directory</li>
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            </TabsContent>
-            
-            {/* Hooks Settings */}
-            <TabsContent value="hooks" className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">User Hooks</h3>
-                    <p className="text-body-small text-muted-foreground mb-4">
-                      Configure hooks that apply to all Claude Code sessions for your user account.
-                      These are stored in <code className="mx-1 px-2 py-1 bg-muted rounded text-xs">~/.claude/settings.json</code>
-                    </p>
+                </Card>
+              </TabsContent>
+
+              {/* Environment Variables */}
+              <TabsContent value="environment" className="space-y-6">
+                <Card className="p-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-heading-4">Environment Variables</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Environment variables applied to every Claude Code session
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addEnvVar}
+                        className="gap-2"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Variable
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {envVars.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-2">
+                          No environment variables configured.
+                        </p>
+                      ) : (
+                        envVars.map((envVar) => (
+                          <motion.div
+                            key={envVar.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center gap-2"
+                          >
+                            <Input
+                              placeholder="KEY"
+                              value={envVar.key}
+                              onChange={(e) => updateEnvVar(envVar.id, "key", e.target.value)}
+                              className="flex-1 font-mono text-sm"
+                            />
+                            <span className="text-muted-foreground">=</span>
+                            <Input
+                              placeholder="value"
+                              value={envVar.value}
+                              onChange={(e) => updateEnvVar(envVar.id, "value", e.target.value)}
+                              className="flex-1 font-mono text-sm"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeEnvVar(envVar.id)}
+                              className="h-8 w-8 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </motion.div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="pt-2 space-y-2">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Common variables:</strong>
+                      </p>
+                      <ul className="text-caption text-muted-foreground space-y-1 ml-4">
+                        <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">CLAUDE_CODE_ENABLE_TELEMETRY</code> - Enable/disable telemetry (0 or 1)</li>
+                        <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">ANTHROPIC_MODEL</code> - Custom model name</li>
+                        <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">DISABLE_COST_WARNINGS</code> - Disable cost warnings (1)</li>
+                      </ul>
+                    </div>
                   </div>
-                  
-                  <HooksEditor
-                    key={activeTab}
-                    scope="user"
-                    className="border-0"
-                    hideActions={true}
-                    onChange={(hasChanges, getHooks) => {
-                      setUserHooksChanged(hasChanges);
-                      getUserHooks.current = getHooks;
+                </Card>
+              </TabsContent>
+              {/* Advanced Settings */}
+              <TabsContent value="advanced" className="space-y-6">
+                <Card className="p-6">
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-base font-semibold mb-4">Advanced Settings</h3>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Additional configuration options for advanced users
+                      </p>
+                    </div>
+
+                    {/* API Key Helper */}
+                    <div className="space-y-2">
+                      <Label htmlFor="apiKeyHelper">API Key Helper Script</Label>
+                      <Input
+                        id="apiKeyHelper"
+                        placeholder="/path/to/generate_api_key.sh"
+                        value={settings?.apiKeyHelper || ""}
+                        onChange={(e) => updateSetting("apiKeyHelper", e.target.value || undefined)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Custom script to generate auth values for API requests
+                      </p>
+                    </div>
+
+                    {/* Raw JSON Editor */}
+                    <div className="space-y-2">
+                      <Label>Raw Settings (JSON)</Label>
+                      <div className="p-3 rounded-md bg-muted font-mono text-xs overflow-x-auto whitespace-pre-wrap">
+                        <pre>{JSON.stringify(settings, null, 2)}</pre>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        This shows the raw JSON that will be saved to ~/.claude/settings.json
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+
+              {/* Hooks Settings */}
+              <TabsContent value="hooks" className="space-y-6">
+                <Card className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-base font-semibold mb-2">User Hooks</h3>
+                      <p className="text-body-small text-muted-foreground mb-4">
+                        Configure hooks that apply to all Claude Code sessions for your user account.
+                        These are stored in <code className="mx-1 px-2 py-1 bg-muted rounded text-xs">~/.claude/settings.json</code>
+                      </p>
+                    </div>
+
+                    <HooksEditor
+                      key={activeTab}
+                      scope="user"
+                      className="border-0"
+                      hideActions={true}
+                      onChange={(hasChanges, getHooks) => {
+                        setUserHooksChanged(hasChanges);
+                        getUserHooks.current = getHooks;
+                      }}
+                    />
+                  </div>
+                </Card>
+              </TabsContent>
+
+              {/* Commands Tab */}
+              <TabsContent value="commands">
+                <Card className="p-6">
+                  <SlashCommandsManager className="p-0" />
+                </Card>
+              </TabsContent>
+
+              {/* Storage Tab */}
+              <TabsContent value="storage">
+                <StorageTab />
+              </TabsContent>
+
+              {/* Proxy Settings */}
+              <TabsContent value="proxy">
+                <Card className="p-6">
+                  <ProxySettings
+                    setToast={setToast}
+                    onChange={(hasChanges, _getSettings, save) => {
+                      setProxySettingsChanged(hasChanges);
+                      saveProxySettings.current = save;
                     }}
                   />
-                </div>
-              </Card>
-            </TabsContent>
-            
-            {/* Commands Tab */}
-            <TabsContent value="commands">
-              <Card className="p-6">
-                <SlashCommandsManager className="p-0" />
-              </Card>
-            </TabsContent>
-            
-            {/* Storage Tab */}
-            <TabsContent value="storage">
-              <StorageTab />
-            </TabsContent>
-            
-            {/* Proxy Settings */}
-            <TabsContent value="proxy">
-              <Card className="p-6">
-                <ProxySettings 
-                  setToast={setToast}
-                  onChange={(hasChanges, _getSettings, save) => {
-                    setProxySettingsChanged(hasChanges);
-                    saveProxySettings.current = save;
-                  }}
-                />
-              </Card>
-            </TabsContent>
-            
-            {/* Health Settings */}
-            <TabsContent value="health">
-              <Card className="p-6 space-y-6">
-                <div>
-                  <h3 className="text-base font-semibold mb-1">Health</h3>
-                  <p className="text-sm text-muted-foreground">两类休息（微活动 / 眼睛休息）与情境化轻打扰提醒（本地）</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="secondary"
-                    onClick={async ()=>{
-                      // 测试模式：所有间隔强制 1 分钟（立即生效）
-                      const one = 1;
-                      setHealthActivityMin(one);
-                      setHealthEyeMin(one);
-                      try {
-                        await invoke('health_set_prefs', { prefs: {
-                          intervals: { activity: one, eye: one, eye_duration_sec: healthEyeDuration },
-                          context: { breakpoints: healthBreakpoints, flow_protection: healthFlowProtection },
-                          alerts: { strength: vgNudgeLevel },
-                          nightly_hour: healthNightlyHour,
-                          quiet_hours: [healthQuietHours],
-                          dnd: healthDnd,
-                          retention: { max_per_day: healthRetentionMax, ttl_days: healthRetentionTtl },
-                        } })
-                        // 写入一次 done 作为起点，确保 1 分钟后到期
-                        await invoke('health_record_action', { event: 'done', kind: 'activity' })
-                        await invoke('health_record_action', { event: 'done', kind: 'eye' })
-                        window.dispatchEvent(new CustomEvent('health-updated'))
-                        setToast({ message: '测试模式：所有间隔已设为 1 分钟', type: 'success' })
-                      } catch (e:any) {
-                        setToast({ message: `应用失败：${String(e?.message||e)}`, type: 'error' })
-                      }
-                    }}
-                  >测试（间隔 1 分钟）</Button>
-                  <Button variant="secondary"
-                    onClick={async ()=>{
-                      // 一键推荐设置
-                      const rec = {
-                        activity: 45,
-                        eye: 20,
-                        eye_duration_sec: 20,
-                        breakpoints: true,
-                        flow: 'mid' as const,
-                        strength: 'gentle' as const,
-                        nightly: 21,
-                        quiet: healthQuietHours || '22:00-08:00',
-                        dnd: true,
-                        retention: { max: 200, ttl: 90 },
-                      }
-                      setHealthActivityMin(rec.activity)
-                      setHealthEyeMin(rec.eye)
-                      setHealthEyeDuration(rec.eye_duration_sec)
-                      setHealthBreakpoints(rec.breakpoints)
-                      setHealthFlowProtection(rec.flow)
-                      setVgNudgeLevel(rec.strength)
-                      setHealthNightlyHour(rec.nightly)
-                      setHealthQuietHours(rec.quiet)
-                      setHealthDnd(rec.dnd)
-                      setHealthRetentionMax(rec.retention.max)
-                      setHealthRetentionTtl(rec.retention.ttl)
-                      // 立即保存
-                      try {
-                        await invoke('health_set_prefs', { prefs: {
-                          intervals: { activity: rec.activity, eye: rec.eye, eye_duration_sec: rec.eye_duration_sec },
-                          context: { breakpoints: rec.breakpoints, flow_protection: rec.flow },
-                          alerts: { strength: rec.strength },
-                          nightly_hour: rec.nightly,
-                          quiet_hours: [rec.quiet],
-                          dnd: rec.dnd,
-                          retention: { max_per_day: rec.retention.max, ttl_days: rec.retention.ttl },
-                        } })
-                        setToast({ message: '已应用推荐设置', type: 'success' })
-                      } catch (e:any) {
-                        setToast({ message: `应用失败：${String(e?.message||e)}` , type: 'error' })
-                      }
-                    }}
-                  >使用推荐设置</Button>
-                  <button
-                    onClick={async ()=>{
-                      try {
-                        setHealthTesting(true)
-                        await invoke('health_record_action', { event: 'nudge', kind: 'activity', trigger_source: 'manual' })
-                        window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: 'activity', strength: 'light' } }))
-                        window.dispatchEvent(new CustomEvent('health-updated'))
-                        // no success toast for test actions
-                      } catch (e:any) {
-                        setToast({ message: `发送测试提醒失败：${String(e?.message||e)}` , type: 'error' })
-                      } finally {
-                        setHealthTesting(false)
-                      }
-                    }}
-                    className="px-3 py-1.5 rounded bg-secondary text-secondary-foreground hover:opacity-90 disabled:opacity-60"
-                    disabled={healthTesting}
-                  >{healthTesting ? '测试中…' : '立即测试提醒'}</button>
-                  <button
-                    onClick={async ()=>{
-                      try {
-                        setHealthTesting(true)
-                        await invoke('health_record_action', { event: 'nudge', kind: 'activity', trigger_source: 'manual' })
-                        window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: 'activity', strength: 'strong' } }))
-                        window.dispatchEvent(new CustomEvent('health-updated'))
-                        // no success toast for test actions
-                      } catch (e:any) {
-                        setToast({ message: `发送测试失败：${String(e?.message||e)}` , type: 'error' })
-                      } finally {
-                        setHealthTesting(false)
-                      }
-                    }}
-                    className="px-3 py-1.5 rounded bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-60"
-                    disabled={healthTesting}
-                  >{healthTesting ? '测试中…' : '测试强提醒'}</button>
-                  <span className="text-xs text-muted-foreground">普通提醒 / 强提醒（全局遮罩 + 10s 倒计时）。</span>
-                </div>
-                {/* Kind-specific quick tests */}
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground mr-1">温和：</span>
-                    {(['activity','eye'] as const).map(k => (
-                      <button key={`g-${k}`}
-                        onClick={async ()=>{
-                          try {
-                            setHealthTesting(true)
-                            await invoke('health_record_action', { event: 'nudge', kind: k, trigger_source: 'manual' })
-                            window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: k, strength: 'light' } }))
-                            window.dispatchEvent(new CustomEvent('health-updated'))
-                            // no success toast for test actions
-                          } catch (e:any) {
-                            setToast({ message: `失败：${String(e?.message||e)}`, type: 'error' })
-                          } finally { setHealthTesting(false) }
-                        }}
-                        className="px-2 py-1 rounded bg-secondary text-secondary-foreground hover:opacity-90 text-xs disabled:opacity-60"
-                        disabled={healthTesting}
-                      >{k === 'activity' ? '微活动' : '眼睛'}</button>
-                    ))}
+                </Card>
+              </TabsContent>
+
+              {/* Health Settings */}
+              <TabsContent value="health">
+                <Card className="p-6 space-y-6">
+                  <div>
+                    <h3 className="text-base font-semibold mb-1">Health</h3>
+                    <p className="text-sm text-muted-foreground">两类休息（微活动 / 眼睛休息）与情境化轻打扰提醒（本地）</p>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground mr-1">强提醒：</span>
-                    {(['activity','eye'] as const).map(k => (
-                      <button key={`s-${k}`}
-                        onClick={async ()=>{
-                          try {
-                            setHealthTesting(true)
-                            await invoke('health_record_action', { event: 'nudge', kind: k, trigger_source: 'manual' })
-                            window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: k, strength: 'strong' } }))
-                            window.dispatchEvent(new CustomEvent('health-updated'))
-                            // no success toast for test actions
-                          } catch (e:any) {
-                            setToast({ message: `失败：${String(e?.message||e)}`, type: 'error' })
-                          } finally { setHealthTesting(false) }
-                        }}
-                        className="px-2 py-1 rounded bg-primary text-primary-foreground hover:opacity-90 text-xs disabled:opacity-60"
-                        disabled={healthTesting}
-                      >{k === 'activity' ? '微活动' : '眼睛'}</button>
-                    ))}
+                  <div className="flex items-center gap-2">
+                    <Button variant="secondary"
+                      onClick={async () => {
+                        // 测试模式：所有间隔强制 1 分钟（立即生效）
+                        const one = 1;
+                        setHealthActivityMin(one);
+                        setHealthEyeMin(one);
+                        try {
+                          await invoke('health_set_prefs', {
+                            prefs: {
+                              intervals: { activity: one, eye: one, eye_duration_sec: healthEyeDuration },
+                              context: { breakpoints: healthBreakpoints, flow_protection: healthFlowProtection },
+                              alerts: { strength: vgNudgeLevel },
+                              nightly_hour: healthNightlyHour,
+                              quiet_hours: [healthQuietHours],
+                              dnd: healthDnd,
+                              retention: { max_per_day: healthRetentionMax, ttl_days: healthRetentionTtl },
+                            }
+                          })
+                          // 写入一次 done 作为起点，确保 1 分钟后到期
+                          await invoke('health_record_action', { event: 'done', kind: 'activity' })
+                          await invoke('health_record_action', { event: 'done', kind: 'eye' })
+                          window.dispatchEvent(new CustomEvent('health-updated'))
+                          setToast({ message: '测试模式：所有间隔已设为 1 分钟', type: 'success' })
+                        } catch (e: any) {
+                          setToast({ message: `应用失败：${String(e?.message || e)}`, type: 'error' })
+                        }
+                      }}
+                    >测试（间隔 1 分钟）</Button>
+                    <Button variant="secondary"
+                      onClick={async () => {
+                        // 一键推荐设置
+                        const rec = {
+                          activity: 45,
+                          eye: 20,
+                          eye_duration_sec: 20,
+                          breakpoints: true,
+                          flow: 'mid' as const,
+                          strength: 'gentle' as const,
+                          nightly: 21,
+                          quiet: healthQuietHours || '22:00-08:00',
+                          dnd: true,
+                          retention: { max: 200, ttl: 90 },
+                        }
+                        setHealthActivityMin(rec.activity)
+                        setHealthEyeMin(rec.eye)
+                        setHealthEyeDuration(rec.eye_duration_sec)
+                        setHealthBreakpoints(rec.breakpoints)
+                        setHealthFlowProtection(rec.flow)
+                        setVgNudgeLevel(rec.strength)
+                        setHealthNightlyHour(rec.nightly)
+                        setHealthQuietHours(rec.quiet)
+                        setHealthDnd(rec.dnd)
+                        setHealthRetentionMax(rec.retention.max)
+                        setHealthRetentionTtl(rec.retention.ttl)
+                        // 立即保存
+                        try {
+                          await invoke('health_set_prefs', {
+                            prefs: {
+                              intervals: { activity: rec.activity, eye: rec.eye, eye_duration_sec: rec.eye_duration_sec },
+                              context: { breakpoints: rec.breakpoints, flow_protection: rec.flow },
+                              alerts: { strength: rec.strength },
+                              nightly_hour: rec.nightly,
+                              quiet_hours: [rec.quiet],
+                              dnd: rec.dnd,
+                              retention: { max_per_day: rec.retention.max, ttl_days: rec.retention.ttl },
+                            }
+                          })
+                          setToast({ message: '已应用推荐设置', type: 'success' })
+                        } catch (e: any) {
+                          setToast({ message: `应用失败：${String(e?.message || e)}`, type: 'error' })
+                        }
+                      }}
+                    >使用推荐设置</Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          setHealthTesting(true)
+                          await invoke('health_record_action', { event: 'nudge', kind: 'activity', trigger_source: 'manual' })
+                          window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: 'activity', strength: 'light' } }))
+                          window.dispatchEvent(new CustomEvent('health-updated'))
+                          // no success toast for test actions
+                        } catch (e: any) {
+                          setToast({ message: `发送测试提醒失败：${String(e?.message || e)}`, type: 'error' })
+                        } finally {
+                          setHealthTesting(false)
+                        }
+                      }}
+                      disabled={healthTesting}
+                    >{healthTesting ? '测试中…' : '立即测试提醒'}</Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          setHealthTesting(true)
+                          await invoke('health_record_action', { event: 'nudge', kind: 'activity', trigger_source: 'manual' })
+                          window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: 'activity', strength: 'strong' } }))
+                          window.dispatchEvent(new CustomEvent('health-updated'))
+                          // no success toast for test actions
+                        } catch (e: any) {
+                          setToast({ message: `发送测试失败：${String(e?.message || e)}`, type: 'error' })
+                        } finally {
+                          setHealthTesting(false)
+                        }
+                      }}
+                      disabled={healthTesting}
+                    >{healthTesting ? '测试中…' : '测试强提醒'}</Button>
+                    <span className="text-xs text-muted-foreground">普通提醒 / 强提醒（全局遮罩 + 10s 倒计时）。</span>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                  <div className="space-y-2">
-                    <Label>微活动间隔（分钟）</Label>
-                    <Input type="number" min={10} value={healthActivityMin}
-                      onChange={(e)=> setHealthActivityMin(Math.max(10, parseInt(e.target.value||'0')||45))}
-                      className="w-32" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>眼睛休息（间隔/时长）</Label>
-                    <div className="flex items-center gap-3">
-                      <Input type="number" min={10} value={healthEyeMin}
-                        onChange={(e)=> setHealthEyeMin(Math.max(10, parseInt(e.target.value||'0')||20))}
-                        className="w-24" />
-                      <Input type="number" min={10} max={60} value={healthEyeDuration}
-                        onChange={(e)=> setHealthEyeDuration(Math.min(60, Math.max(10, parseInt(e.target.value||'0')||20)))}
-                        className="w-24" />
+                  {/* Kind-specific quick tests */}
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground mr-1">温和：</span>
+                      {(['activity', 'eye'] as const).map(k => (
+                        <Button key={`g-${k}`}
+                          variant="secondary"
+                          size="sm"
+                          className="text-xs"
+                          onClick={async () => {
+                            try {
+                              setHealthTesting(true)
+                              await invoke('health_record_action', { event: 'nudge', kind: k, trigger_source: 'manual' })
+                              window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: k, strength: 'light' } }))
+                              window.dispatchEvent(new CustomEvent('health-updated'))
+                              // no success toast for test actions
+                            } catch (e: any) {
+                              setToast({ message: `失败：${String(e?.message || e)}`, type: 'error' })
+                            } finally { setHealthTesting(false) }
+                          }}
+                          disabled={healthTesting}
+                        >{k === 'activity' ? '微活动' : '眼睛'}</Button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground mr-1">强提醒：</span>
+                      {(['activity', 'eye'] as const).map(k => (
+                        <Button key={`s-${k}`}
+                          variant="default"
+                          size="sm"
+                          className="text-xs"
+                          onClick={async () => {
+                            try {
+                              setHealthTesting(true)
+                              await invoke('health_record_action', { event: 'nudge', kind: k, trigger_source: 'manual' })
+                              window.dispatchEvent(new CustomEvent('health-nudge', { detail: { kind: k, strength: 'strong' } }))
+                              window.dispatchEvent(new CustomEvent('health-updated'))
+                              // no success toast for test actions
+                            } catch (e: any) {
+                              setToast({ message: `失败：${String(e?.message || e)}`, type: 'error' })
+                            } finally { setHealthTesting(false) }
+                          }}
+                          disabled={healthTesting}
+                        >{k === 'activity' ? '微活动' : '眼睛'}</Button>
+                      ))}
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>情境智能</Label>
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Switch id="health-breakpoints" checked={healthBreakpoints} onCheckedChange={setHealthBreakpoints} />
-                        <Label htmlFor="health-breakpoints" className="cursor-pointer">在自然断点提醒我</Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>避免打扰我：</span>
-                        <Select value={healthFlowProtection} onValueChange={(v)=> setHealthFlowProtection(v as any)}>
-                          <SelectTrigger className="w-28 h-8">
-                            <SelectValue placeholder="选择" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">低</SelectItem>
-                            <SelectItem value="mid">中</SelectItem>
-                            <SelectItem value="high">高</SelectItem>
-                          </SelectContent>
-                        </Select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div className="space-y-2">
+                      <Label>微活动间隔（分钟）</Label>
+                      <Input type="number" min={10} value={healthActivityMin}
+                        onChange={(e) => setHealthActivityMin(Math.max(10, parseInt(e.target.value || '0') || 45))}
+                        className="w-32" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>眼睛休息（间隔/时长）</Label>
+                      <div className="flex items-center gap-3">
+                        <Input type="number" min={10} value={healthEyeMin}
+                          onChange={(e) => setHealthEyeMin(Math.max(10, parseInt(e.target.value || '0') || 20))}
+                          className="w-24" />
+                        <Input type="number" min={10} max={60} value={healthEyeDuration}
+                          onChange={(e) => setHealthEyeDuration(Math.min(60, Math.max(10, parseInt(e.target.value || '0') || 20)))}
+                          className="w-24" />
                       </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>提示强度</Label>
-                    <RadioGroup value={vgNudgeLevel} onValueChange={(v)=> setVgNudgeLevel(v as any)} className="flex items-center gap-6">
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem value="gentle" id="nudge-gentle" />
-                        <Label htmlFor="nudge-gentle" className="cursor-pointer">温和</Label>
+                    <div className="space-y-2">
+                      <Label>情境智能</Label>
+                      <div className="flex items-center gap-6 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Switch id="health-breakpoints" checked={healthBreakpoints} onCheckedChange={setHealthBreakpoints} />
+                          <Label htmlFor="health-breakpoints" className="cursor-pointer">在自然断点提醒我</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span>避免打扰我：</span>
+                          <Select value={healthFlowProtection} onValueChange={(v) => setHealthFlowProtection(v as any)}>
+                            <SelectTrigger className="w-28 h-8">
+                              <SelectValue placeholder="选择" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">低</SelectItem>
+                              <SelectItem value="mid">中</SelectItem>
+                              <SelectItem value="high">高</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>提示强度</Label>
+                      <RadioGroup value={vgNudgeLevel} onValueChange={(v) => setVgNudgeLevel(v as any)} className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem value="gentle" id="nudge-gentle" />
+                          <Label htmlFor="nudge-gentle" className="cursor-pointer">温和</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem value="active" id="nudge-active" />
+                          <Label htmlFor="nudge-active" className="cursor-pointer">积极</Label>
+                        </div>
+                      </RadioGroup>
+                      <p className="text-caption text-muted-foreground">仅在自然断点介入；忙碌时自动延后。</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>夜间不提醒（起始小时）</Label>
+                      <Select value={String(healthNightlyHour)} onValueChange={(v) => setHealthNightlyHour(parseInt(v))}>
+                        <SelectTrigger className="w-28 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, i) => i).map(h => (
+                            <SelectItem key={h} value={String(h)}>{h}:00</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>安静时段（示例：22:00-08:00）</Label>
+                      <Input type="text" value={healthQuietHours} onChange={(e) => setHealthQuietHours(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>免打扰</Label>
                       <div className="flex items-center gap-2">
-                        <RadioGroupItem value="active" id="nudge-active" />
-                        <Label htmlFor="nudge-active" className="cursor-pointer">积极</Label>
+                        <Switch id="health-dnd" checked={healthDnd} onCheckedChange={setHealthDnd} />
+                        <Label htmlFor="health-dnd">开启免打扰</Label>
                       </div>
-                    </RadioGroup>
-                    <p className="text-caption text-muted-foreground">仅在自然断点介入；忙碌时自动延后。</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>夜间不提醒（起始小时）</Label>
-                    <Select value={String(healthNightlyHour)} onValueChange={(v)=> setHealthNightlyHour(parseInt(v))}>
-                      <SelectTrigger className="w-28 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({length:24}, (_,i)=> i).map(h => (
-                          <SelectItem key={h} value={String(h)}>{h}:00</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>安静时段（示例：22:00-08:00）</Label>
-                    <Input type="text" value={healthQuietHours} onChange={(e)=> setHealthQuietHours(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>免打扰</Label>
-                    <div className="flex items-center gap-2">
-                      <Switch id="health-dnd" checked={healthDnd} onCheckedChange={setHealthDnd} />
-                      <Label htmlFor="health-dnd">开启免打扰</Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>每日事件上限</Label>
+                      <Input type="number" min={50} value={healthRetentionMax}
+                        onChange={(e) => setHealthRetentionMax(Math.max(50, parseInt(e.target.value || '0') || 200))}
+                        className="w-32" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>保留天数</Label>
+                      <Input type="number" min={7} value={healthRetentionTtl}
+                        onChange={(e) => setHealthRetentionTtl(Math.max(7, parseInt(e.target.value || '0') || 90))}
+                        className="w-32" />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>每日事件上限</Label>
-                    <Input type="number" min={50} value={healthRetentionMax}
-                      onChange={(e)=> setHealthRetentionMax(Math.max(50, parseInt(e.target.value||'0')||200))}
-                      className="w-32" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>保留天数</Label>
-                    <Input type="number" min={7} value={healthRetentionTtl}
-                      onChange={(e)=> setHealthRetentionTtl(Math.max(7, parseInt(e.target.value||'0')||90))}
-                      className="w-32" />
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-            
-          </Tabs>
-        </div>
-      )}
+                </Card>
+              </TabsContent>
+
+            </Tabs>
+          </div>
+        )}
       </div>
-      
+
       {/* Toast Notification */}
       <ToastContainer>
         {toast && (
@@ -1377,8 +1377,8 @@ export const Settings: React.FC<SettingsProps> = ({
           />
         )}
       </ToastContainer>
-      
-      
+
+
     </div>
   );
 }; 
