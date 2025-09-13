@@ -43,6 +43,28 @@
 
 ---
 
+## 🎯 产品介绍
+
+<div align="center">
+  <table>
+    <tr>
+      <td width="33%" align="center">
+        <img src="images/hackathon/intro1.png" width="100%" alt="code-zen 产品介绍 1"/>
+      </td>
+      <td width="33%" align="center">
+        <img src="images/hackathon/intro2.png" width="100%" alt="code-zen 产品介绍 2"/>
+      </td>
+      <td width="33%" align="center">
+        <img src="images/hackathon/intro3.png" width="100%" alt="code-zen 产品介绍 3"/>
+      </td>
+    </tr>
+  </table>
+</div>
+
+**code-zen** 是一款专为开发者设计的身心健康管理工具，基于 opcode 二次开发，融合智能提醒、专注音乐、数据可视化等功能，让健康管理如呼吸般自然融入编码工作流。
+
+---
+
 ## 🧘‍♂️ 项目缘起 - 专注与平衡的艺术
 
 ### 为什么选择"编码禅师"主题？
