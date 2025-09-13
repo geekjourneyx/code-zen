@@ -1112,8 +1112,8 @@ export const Settings: React.FC<SettingsProps> = ({
                   <div className="flex items-center gap-2">
                     <Button variant="secondary"
                       onClick={async () => {
-                        // 测试模式：所有间隔强制 1 分钟（立即生效）
-                        const one = 1;
+                        // 测试模式：所有间隔强制 30 秒（立即生效）
+                        const one = 0.5;
                         setHealthActivityMin(one);
                         setHealthEyeMin(one);
                         try {
@@ -1128,16 +1128,23 @@ export const Settings: React.FC<SettingsProps> = ({
                               retention: { max_per_day: healthRetentionMax, ttl_days: healthRetentionTtl },
                             }
                           })
-                          // 写入一次 done 作为起点，确保 1 分钟后到期
+                          // 写入一次 done 作为起点，确保 30 秒后到期
                           await invoke('health_record_action', { event: 'done', kind: 'activity' })
                           await invoke('health_record_action', { event: 'done', kind: 'eye' })
+                          
+                          // 标记测试模式：30秒后到期，立即触发机制
+                          const testEndTime = Date.now() + 30000
+                          sessionStorage.setItem('health_test_mode', 'true')
+                          sessionStorage.setItem('health_test_end_time', String(testEndTime))
+                          sessionStorage.removeItem('health_test_triggered') // 确保可以重新触发
+                          
                           window.dispatchEvent(new CustomEvent('health-updated'))
-                          setToast({ message: '测试模式：所有间隔已设为 1 分钟', type: 'success' })
+                          setToast({ message: '测试模式：所有间隔已设为 30 秒', type: 'success' })
                         } catch (e: any) {
                           setToast({ message: `应用失败：${String(e?.message || e)}`, type: 'error' })
                         }
                       }}
-                    >测试（间隔 1 分钟）</Button>
+                    >测试（间隔 30 秒）</Button>
                     <Button variant="secondary"
                       onClick={async () => {
                         // 一键推荐设置

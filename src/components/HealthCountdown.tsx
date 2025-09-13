@@ -32,6 +32,48 @@ export default function HealthCountdown() {
       } catch { return false }
     }
 
+    // 检测测试模式并立即触发提醒
+    const checkAndTriggerTest = async () => {
+      try {
+        // 检查是否在测试模式时间窗口内
+        const testMode = sessionStorage.getItem('health_test_mode')
+        const testEndTime = sessionStorage.getItem('health_test_end_time')
+        const hasTriggered = sessionStorage.getItem('health_test_triggered')
+        
+        if (testMode === 'true' && testEndTime && !hasTriggered) {
+          const endTime = parseInt(testEndTime)
+          const now = Date.now()
+          
+          // 检查是否到期且未触发
+          if (now >= endTime) {
+            // 获取当前到期状态
+            const due = await invoke<NextDue>('health_next_due')
+            
+            // 检查是否有到期的健康提醒 - 关键修复：引入500ms容差处理浮点精度问题
+            if (due.activity_ms <= 500 || due.eye_ms <= 500) {
+              // 标记已触发，避免重复
+              sessionStorage.setItem('health_test_triggered', 'true')
+              
+              // 触发健康提醒，使用强提醒模式确保可见性
+              const targetKind = due.activity_ms <= 500 ? 'activity' : 'eye'  // 选择最先到期的类型
+              await invoke('health_record_action', { 
+                event: 'nudge', 
+                kind: targetKind, 
+                trigger_source: 'test_mode' 
+              })
+              
+              // 派发事件触发UI显示
+              window.dispatchEvent(new CustomEvent('health-nudge', { 
+                detail: { kind: targetKind, strength: 'strong' } 
+              }))
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Health test mode check failed:', e)
+      }
+    }
+
     const tick = async () => {
       try {
         const [prefsAny, next] = await Promise.all([
@@ -44,12 +86,25 @@ export default function HealthCountdown() {
         setDnd(!!p.dnd)
         setQuiet(withinQuietHours(q || ''))
         setDue(next)
+        
+        // 检测测试模式（放在数据更新后，确保有最新状态）
+        await checkAndTriggerTest()
       } catch {}
+    }
+
+    // 监听 health-updated 事件，立即刷新
+    const onHealthUpdated = () => {
+      tick()
     }
 
     tick()
     timerRef.current = window.setInterval(tick, 1000) as unknown as number
-    return () => { if (timerRef.current) window.clearInterval(timerRef.current) }
+    window.addEventListener('health-updated', onHealthUpdated as EventListener)
+    
+    return () => {
+      if (timerRef.current) window.clearInterval(timerRef.current)
+      window.removeEventListener('health-updated', onHealthUpdated as EventListener)
+    }
   }, [])
 
   const nextEyeAt = new Date(Date.now() + Math.max(0, due.eye_ms))

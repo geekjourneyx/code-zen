@@ -62,11 +62,13 @@ pub async fn health_next_due(app: tauri::AppHandle) -> Result<NextDue, String> {
     let prefs_root = get_prefs(&conn).unwrap_or(serde_json::json!({}));
     let prefs_val = prefs_root.get("prefs").cloned().unwrap_or(serde_json::json!({}));
     let def_activity = prefs_val
-        .get("intervals").and_then(|i| i.get("activity")).and_then(|v| v.as_i64())
-        .unwrap_or(45) as i64; // minutes
+        .get("intervals").and_then(|i| i.get("activity"))
+        .and_then(|v| v.as_f64().or_else(|| v.as_i64().map(|i| i as f64)))
+        .unwrap_or(45.0); // minutes (now supports decimals)
     let def_eye = prefs_val
-        .get("intervals").and_then(|i| i.get("eye")).and_then(|v| v.as_i64())
-        .unwrap_or(20) as i64; // minutes
+        .get("intervals").and_then(|i| i.get("eye"))
+        .and_then(|v| v.as_f64().or_else(|| v.as_i64().map(|i| i as f64)))
+        .unwrap_or(20.0); // minutes (now supports decimals)
 
     let now = Utc::now();
 
@@ -114,9 +116,9 @@ pub async fn health_next_due(app: tauri::AppHandle) -> Result<NextDue, String> {
         conn: &rusqlite::Connection,
         now: DateTime<Utc>,
         kind: &str,
-        period_min: i64,
+        period_min: f64,
     ) -> i64 {
-        let period_ms = period_min * 60 * 1000;
+        let period_ms = (period_min * 60.0 * 1000.0).round() as i64;
         let last_done_ts = last_done(conn, kind);
         // 原始due剩余
         let original_due_ms = match last_done_ts {

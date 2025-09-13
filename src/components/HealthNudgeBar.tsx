@@ -96,6 +96,13 @@ export default function HealthNudgeBar() {
     if (highlightTimerRef.current) { window.clearTimeout(highlightTimerRef.current); highlightTimerRef.current = null }
     if (rafRef.current) { window.cancelAnimationFrame(rafRef.current); rafRef.current = null }
     overlayActiveRef.current = false
+    
+    // 清理测试模式状态（如果是测试模式触发的提醒）
+    if (sessionStorage.getItem('health_test_mode') === 'true') {
+      sessionStorage.removeItem('health_test_mode')
+      sessionStorage.removeItem('health_test_end_time')
+      sessionStorage.removeItem('health_test_triggered')
+    }
   }
 
   if (!kind) return null
