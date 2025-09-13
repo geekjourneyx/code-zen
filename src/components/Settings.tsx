@@ -28,6 +28,7 @@ import { Toast, ToastContainer } from "@/components/ui/toast";
 import { ClaudeVersionSelector } from "./ClaudeVersionSelector";
 import { StorageTab } from "./StorageTab";
 import { HooksEditor } from "./HooksEditor";
+import { musicManager } from "@/lib/music";
 import { SlashCommandsManager } from "./SlashCommandsManager";
 import { ProxySettings } from "./ProxySettings";
 import { useTheme, useTrackEvent } from "@/hooks";
@@ -116,6 +117,12 @@ export const Settings: React.FC<SettingsProps> = ({
   const [healthEyeDuration, setHealthEyeDuration] = useState<number>(20);
   const [healthBreakpoints, setHealthBreakpoints] = useState<boolean>(true);
   const [healthFlowProtection, setHealthFlowProtection] = useState<'low' | 'mid' | 'high'>('mid');
+  
+  // Music settings
+  const [musicEnabled, setMusicEnabled] = useState<boolean>(false);
+  const [musicVolume, setMusicVolume] = useState<number>(50);
+  const [musicAutoPlay, setMusicAutoPlay] = useState<boolean>(true);
+  const [musicIsPlaying, setMusicIsPlaying] = useState<boolean>(false);
 
   // Load settings on mount
   useEffect(() => {
@@ -139,6 +146,24 @@ export const Settings: React.FC<SettingsProps> = ({
         setHealthDnd(!!p.dnd);
         setHealthRetentionMax((p.retention && parseInt(p.retention.max_per_day)) || 200);
         setHealthRetentionTtl((p.retention && parseInt(p.retention.ttl_days)) || 90);
+        
+        // Load music settings
+        const music = p.music || {};
+        setMusicEnabled(!!music.enabled);
+        setMusicVolume(parseInt(music.volume) || 50);
+        setMusicAutoPlay(music.auto_play !== false);
+        
+        // Initialize music manager
+        musicManager.init({
+          enabled: !!music.enabled,
+          volume: parseInt(music.volume) || 50,
+          autoPlay: music.auto_play !== false
+        });
+        
+        // Auto play if enabled
+        if (music.enabled && music.auto_play !== false) {
+          setTimeout(() => musicManager.play(), 1000);
+        }
       } catch (e) {
         console.warn('Failed to load Health prefs', e);
       }
@@ -150,6 +175,20 @@ export const Settings: React.FC<SettingsProps> = ({
       const pref = await api.getSetting('startup_intro_enabled');
       setStartupIntroEnabled(pref === null ? true : pref === 'true');
     })();
+  }, []);
+
+  // Music event listeners
+  useEffect(() => {
+    const handleMusicPlay = () => setMusicIsPlaying(true);
+    const handleMusicPause = () => setMusicIsPlaying(false);
+
+    window.addEventListener('music-play', handleMusicPlay);
+    window.addEventListener('music-pause', handleMusicPause);
+
+    return () => {
+      window.removeEventListener('music-play', handleMusicPlay);
+      window.removeEventListener('music-pause', handleMusicPause);
+    };
   }, []);
 
   /**
@@ -288,6 +327,7 @@ export const Settings: React.FC<SettingsProps> = ({
           quiet_hours: [healthQuietHours],
           dnd: healthDnd,
           retention: { max_per_day: healthRetentionMax, ttl_days: healthRetentionTtl },
+          music: { enabled: musicEnabled, volume: musicVolume, auto_play: musicAutoPlay },
         }
       });
 
@@ -306,6 +346,31 @@ export const Settings: React.FC<SettingsProps> = ({
    */
   const updateSetting = (key: string, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  /**
+   * Music control functions
+   */
+  const handleMusicToggle = async () => {
+    const newEnabled = !musicEnabled;
+    setMusicEnabled(newEnabled);
+    
+    musicManager.updateSettings({ enabled: newEnabled });
+    
+    if (newEnabled) {
+      await musicManager.play();
+    } else {
+      musicManager.pause();
+    }
+  };
+
+  const handleMusicPlayPause = () => {
+    musicManager.toggle();
+  };
+
+  const handleMusicVolumeChange = (volume: number) => {
+    setMusicVolume(volume);
+    musicManager.setVolume(volume);
   };
 
   /**
@@ -1126,6 +1191,7 @@ export const Settings: React.FC<SettingsProps> = ({
                               quiet_hours: [healthQuietHours],
                               dnd: healthDnd,
                               retention: { max_per_day: healthRetentionMax, ttl_days: healthRetentionTtl },
+                              music: { enabled: musicEnabled, volume: musicVolume, auto_play: musicAutoPlay },
                             }
                           })
                           // 写入一次 done 作为起点，确保 30 秒后到期
@@ -1182,6 +1248,7 @@ export const Settings: React.FC<SettingsProps> = ({
                               quiet_hours: [rec.quiet],
                               dnd: rec.dnd,
                               retention: { max_per_day: rec.retention.max, ttl_days: rec.retention.ttl },
+                              music: { enabled: musicEnabled, volume: musicVolume, auto_play: musicAutoPlay },
                             }
                           })
                           setToast({ message: '已应用推荐设置', type: 'success' })
@@ -1365,6 +1432,52 @@ export const Settings: React.FC<SettingsProps> = ({
                         onChange={(e) => setHealthRetentionTtl(Math.max(7, parseInt(e.target.value || '0') || 90))}
                         className="w-32" />
                     </div>
+                    <div className="space-y-2">
+                      <Label>专注音乐</Label>
+                      <div className="flex items-center gap-2">
+                        <Switch id="music-enabled" checked={musicEnabled} onCheckedChange={handleMusicToggle} />
+                        <Label htmlFor="music-enabled" className="cursor-pointer">启用专注音乐</Label>
+                      </div>
+                      <p className="text-xs text-muted-foreground">循环播放 ADHD_01.mp3 (10分钟) • 沉浸式编码背景音乐</p>
+                    </div>
+                    {musicEnabled && (
+                      <div className="space-y-2">
+                        <Label>音乐控制</Label>
+                        <div className="flex items-center gap-4">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleMusicPlayPause}
+                            className="min-w-[80px]"
+                          >
+                            {musicIsPlaying ? '暂停' : '播放'}
+                          </Button>
+                          
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">音量</span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={musicVolume}
+                              onChange={(e) => handleMusicVolumeChange(parseInt(e.target.value))}
+                              className="w-20 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <span className="text-xs text-muted-foreground w-8">{musicVolume}%</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Switch 
+                              id="music-autoplay" 
+                              checked={musicAutoPlay} 
+                              onCheckedChange={setMusicAutoPlay}
+                              className="scale-75"
+                            />
+                            <Label htmlFor="music-autoplay" className="text-xs cursor-pointer">启动时自动播放</Label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </Card>
               </TabsContent>

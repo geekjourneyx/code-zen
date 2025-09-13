@@ -73,7 +73,7 @@
       "icons/icon.ico",
       "icons/icon.icns"
     ],
-    "resources": [],
+    "resources": ["resources/music/*"],
     "externalBin": [],
     "copyright": "© 2025 Asterisk. All rights reserved.",
     "category": "DeveloperTool",

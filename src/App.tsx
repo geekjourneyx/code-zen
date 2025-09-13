@@ -27,6 +27,7 @@ import { useAppLifecycle, useTrackEvent } from "@/hooks";
 import { StartupIntro } from "@/components/StartupIntro";
 import HealthNudgeBar from "@/components/HealthNudgeBar";
 import HealthScheduler from "@/components/HealthScheduler";
+import { musicManager } from "@/lib/music";
 
 type View = 
   | "welcome" 
@@ -83,6 +84,11 @@ function AppContent() {
       });
     }
   }, [view, projects.length, hasTrackedFirstChat, trackEvent]);
+
+  // Initialize music manager on app start
+  useEffect(() => {
+    musicManager.init();
+  }, []);
 
   // Load projects on mount when in projects view
   useEffect(() => {
