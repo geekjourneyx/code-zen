@@ -46,16 +46,24 @@
 ## 🎯 产品介绍
 
 <div align="center">
+  <img src="images/zen.png" alt="编码禅师" width="200" style="margin-bottom: 20px;">
+  <br><strong>编码禅师 - 专注与平静的守护者</strong>
+</div>
+
+<div align="center">
   <table>
     <tr>
       <td width="33%" align="center">
         <img src="images/hackathon/intro1.png" width="100%" alt="code-zen 产品介绍 1"/>
+        <br><strong>智能健康提醒系统</strong>
       </td>
       <td width="33%" align="center">
         <img src="images/hackathon/intro2.png" width="100%" alt="code-zen 产品介绍 2"/>
+        <br><strong>专注音乐与数据面板</strong>
       </td>
       <td width="33%" align="center">
         <img src="images/hackathon/intro3.png" width="100%" alt="code-zen 产品介绍 3"/>
+        <br><strong>个性化设置与体验</strong>
       </td>
     </tr>
   </table>
