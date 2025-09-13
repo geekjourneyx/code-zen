@@ -1202,7 +1202,7 @@ export const Settings: React.FC<SettingsProps> = ({
                       disabled={healthTesting}
                     >{healthTesting ? '测试中…' : '立即测试提醒'}</Button>
                     <Button
-                      variant="default"
+                      variant="secondary"
                       size="sm"
                       onClick={async () => {
                         try {
@@ -1249,7 +1249,7 @@ export const Settings: React.FC<SettingsProps> = ({
                       <span className="text-xs text-muted-foreground mr-1">强提醒：</span>
                       {(['activity', 'eye'] as const).map(k => (
                         <Button key={`s-${k}`}
-                          variant="default"
+                          variant="secondary"
                           size="sm"
                           className="text-xs"
                           onClick={async () => {

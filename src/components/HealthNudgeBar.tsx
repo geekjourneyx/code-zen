@@ -45,7 +45,7 @@ export default function HealthNudgeBar() {
   useEffect(() => {
     const totalDur = (kind === 'eye') ? 20000 : 60000 // eye 20s, activity 60s
     if (kind && kind !== 'nightly') {
-      const overlay = (strength === 'strong') || (kind === 'eye')
+      const overlay = (strength === 'strong')
       setShowOverlay(overlay)
       setCountdown(totalDur / 1000)
       setProgress(0)
