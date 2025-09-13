@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "opcode",
+  "productName": "code-zen",
   "version": "0.2.1",
   "identifier": "opcode.asterisk.so",
   "build": {
@@ -13,7 +13,7 @@
     "macOSPrivateApi": true,
     "windows": [
       {
-        "title": "opcode",
+        "title": "code-zen",
         "width": 800,
         "height": 600,
         "decorations": false,

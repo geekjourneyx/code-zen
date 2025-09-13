@@ -117,7 +117,7 @@ export const Settings: React.FC<SettingsProps> = ({
   const [healthEyeDuration, setHealthEyeDuration] = useState<number>(20);
   const [healthBreakpoints, setHealthBreakpoints] = useState<boolean>(true);
   const [healthFlowProtection, setHealthFlowProtection] = useState<'low' | 'mid' | 'high'>('mid');
-  
+
   // Music settings
   const [musicEnabled, setMusicEnabled] = useState<boolean>(false);
   const [musicVolume, setMusicVolume] = useState<number>(50);
@@ -146,20 +146,20 @@ export const Settings: React.FC<SettingsProps> = ({
         setHealthDnd(!!p.dnd);
         setHealthRetentionMax((p.retention && parseInt(p.retention.max_per_day)) || 200);
         setHealthRetentionTtl((p.retention && parseInt(p.retention.ttl_days)) || 90);
-        
+
         // Load music settings
         const music = p.music || {};
         setMusicEnabled(!!music.enabled);
         setMusicVolume(parseInt(music.volume) || 50);
         setMusicAutoPlay(music.auto_play !== false);
-        
+
         // Initialize music manager
         musicManager.init({
           enabled: !!music.enabled,
           volume: parseInt(music.volume) || 50,
           autoPlay: music.auto_play !== false
         });
-        
+
         // Auto play if enabled
         if (music.enabled && music.auto_play !== false) {
           setTimeout(() => musicManager.play(), 1000);
@@ -354,9 +354,9 @@ export const Settings: React.FC<SettingsProps> = ({
   const handleMusicToggle = async () => {
     const newEnabled = !musicEnabled;
     setMusicEnabled(newEnabled);
-    
+
     musicManager.updateSettings({ enabled: newEnabled });
-    
+
     if (newEnabled) {
       await musicManager.play();
     } else {
@@ -783,7 +783,7 @@ export const Settings: React.FC<SettingsProps> = ({
                         <div className="space-y-1">
                           <Label htmlFor="analytics-enabled">Enable Analytics</Label>
                           <p className="text-caption text-muted-foreground">
-                            Help improve opcode by sharing anonymous usage data
+                            Help improve code-zen by sharing anonymous usage data
                           </p>
                         </div>
                         <Switch
@@ -1197,13 +1197,13 @@ export const Settings: React.FC<SettingsProps> = ({
                           // 写入一次 done 作为起点，确保 30 秒后到期
                           await invoke('health_record_action', { event: 'done', kind: 'activity' })
                           await invoke('health_record_action', { event: 'done', kind: 'eye' })
-                          
+
                           // 标记测试模式：30秒后到期，立即触发机制
                           const testEndTime = Date.now() + 30000
                           sessionStorage.setItem('health_test_mode', 'true')
                           sessionStorage.setItem('health_test_end_time', String(testEndTime))
                           sessionStorage.removeItem('health_test_triggered') // 确保可以重新触发
-                          
+
                           window.dispatchEvent(new CustomEvent('health-updated'))
                           setToast({ message: '测试模式：所有间隔已设为 30 秒', type: 'success' })
                         } catch (e: any) {
@@ -1452,7 +1452,7 @@ export const Settings: React.FC<SettingsProps> = ({
                           >
                             {musicIsPlaying ? '暂停' : '播放'}
                           </Button>
-                          
+
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">音量</span>
                             <input
@@ -1465,11 +1465,11 @@ export const Settings: React.FC<SettingsProps> = ({
                             />
                             <span className="text-xs text-muted-foreground w-8">{musicVolume}%</span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
-                            <Switch 
-                              id="music-autoplay" 
-                              checked={musicAutoPlay} 
+                            <Switch
+                              id="music-autoplay"
+                              checked={musicAutoPlay}
                               onCheckedChange={setMusicAutoPlay}
                               className="scale-75"
                             />
